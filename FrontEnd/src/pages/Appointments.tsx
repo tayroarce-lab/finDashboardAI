@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { 
   ChevronLeft, ChevronRight, Clock, User, Plus, 
-  CheckCircle, XCircle, AlertCircle, TrendingUp 
+  CheckCircle, XCircle, AlertCircle 
 } from 'lucide-react';
 import Skeleton from '../components/ui/Skeleton';
 import { toast } from 'sonner';

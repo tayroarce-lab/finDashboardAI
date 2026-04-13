@@ -60,7 +60,6 @@ export default function AIPanel() {
              }));
            setRealAlerts([...newAlerts, ...mockAlerts].slice(0, 5)); // Mostrar mix
         }
-      })
       }).catch(err => {
       console.error("Error CFO API:", err);
       toast.error('Error al conectar con el motor de IA');
@@ -69,16 +68,23 @@ export default function AIPanel() {
 
   const triggerAnalysis = async () => {
     setLoading(true);
-    toast.promise(
-      fetch('https://onlyautotask-n8n.tuoaro.easypanel.host/webhook/trigger-cfo-analysis', { 
-        method: 'POST' 
-      }),
-      {
-        loading: 'El CFO Digital está analizando tu base de datos...',
-        success: 'Análisis completado. Nuevos insights guardados en tu panel.',
-        error: 'Error al iniciar análisis. Verifica la conexión con n8n.'
-      }
-    ).finally(() => setLoading(false));
+    const triggerPromise = fetch('https://onlyautotask-n8n.tuoaro.easypanel.host/webhook/trigger-cfo-analysis', { 
+      method: 'POST' 
+    });
+
+    toast.promise(triggerPromise, {
+      loading: 'El CFO Digital está analizando tu base de datos...',
+      success: 'Análisis completado. Nuevos insights guardados en tu panel.',
+      error: 'Error al iniciar análisis. Verifica la conexión con n8n.'
+    });
+
+    try {
+      await triggerPromise;
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const sendMessage = async (text: string) => {
