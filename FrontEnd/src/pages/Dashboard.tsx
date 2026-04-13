@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BrainCircuit, Bell, TrendingUp, ArrowRight } from 'lucide-react';
+import { BrainCircuit, Bell, TrendingUp, ArrowRight, Trophy } from 'lucide-react';
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis,
   CartesianGrid, Tooltip, BarChart, Bar, Cell
@@ -132,7 +132,7 @@ export default function Dashboard() {
         {/* Top Treatments */}
         <div className="card animate-fade-in stagger-5">
           <div className="card-header">
-            <h3>🏆 Top Tratamientos por Rentabilidad</h3>
+            <h3><Trophy size={18} /> Top Tratamientos por Rentabilidad</h3>
           </div>
           <div className="chart-container">
             <ResponsiveContainer width="100%" height={300}>

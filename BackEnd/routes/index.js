@@ -8,11 +8,13 @@ const patientRoutes = require('./patientRoutes');
 const expenseRoutes = require('./expenseRoutes');
 const appointmentRoutes = require('./appointmentRoutes');
 const dashboardRoutes = require('./dashboardRoutes');
+const financialRoutes = require('./financialRoutes');
 
 const router = Router();
 
-// ─── Rutas públicas ─────────────────────────
+// ─── Rutas públicas y Server-to-Server ─────────────────────────
 router.use('/auth', authRoutes);
+router.use('/finance', financialRoutes); // Accesible para n8n en el MVP
 
 // ─── Middleware de autenticación (todo lo siguiente requiere JWT) ───
 router.use(authMiddleware);

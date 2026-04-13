@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Stethoscope, Receipt, CalendarDays,
-  BrainCircuit, Settings, LogOut
+  BrainCircuit, Settings, LogOut, Activity
 } from 'lucide-react';
 import './Sidebar.css';
 
@@ -25,7 +25,7 @@ export default function Sidebar() {
   return (
     <aside className="sidebar">
       <div className="sidebar-brand">
-        <div className="sidebar-logo">🦷</div>
+        <div className="sidebar-logo"><Activity size={24} color="#6366f1" /></div>
         <div>
           <h1 className="sidebar-title">DentalFlow</h1>
           <span className="sidebar-subtitle">AI</span>

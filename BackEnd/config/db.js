@@ -1,29 +1,46 @@
 const mysql = require('mysql2/promise');
-const env = require('./env');
+require('dotenv').config();
 
-const pool = mysql.createPool({
-    host: env.DB_HOST,
-    user: env.DB_USER,
-    password: env.DB_PASSWORD,
-    database: env.DB_NAME,
-    port: env.DB_PORT,
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0,
-    enableKeepAlive: true,
-    keepAliveInitialDelay: 0
-});
-
-// Test de conexión al arrancar
-const testConnection = async () => {
-    try {
-        const connection = await pool.getConnection();
-        console.log('✅ Conexión a MySQL exitosa');
-        connection.release();
-    } catch (error) {
-        console.error('❌ Error conectando a MySQL:', error.message);
-        process.exit(1);
+class Database {
+    constructor() {
+        if (!Database.instance) {
+            this.pool = mysql.createPool({
+                host: process.env.DB_HOST || 'localhost',
+                user: process.env.DB_USER || 'root',
+                password: process.env.DB_PASSWORD || '',
+                database: process.env.DB_NAME || 'dentalflow_db',
+                waitForConnections: true,
+                connectionLimit: 10,
+                queueLimit: 0
+            });
+            this.query = this.query.bind(this);
+            this.testConnection = this.testConnection.bind(this);
+            Database.instance = this;
+        }
+        return Database.instance;
     }
-};
 
-module.exports = { pool, testConnection };
+    async query(sql, params) {
+        try {
+            const [rows] = await this.pool.execute(sql, params);
+            return rows;
+        } catch (error) {
+            console.error('Database Query Error:', error);
+            throw error;
+        }
+    }
+
+    async testConnection() {
+        try {
+            const connection = await this.pool.getConnection();
+            connection.release();
+            console.log('✅ Conexión a Base de Datos MySQL (POO) Exitosa');
+            return true;
+        } catch (error) {
+            console.error('❌ Error de Base de Datos:', error.message);
+            throw error;
+        }
+    }
+}
+
+module.exports = new Database();

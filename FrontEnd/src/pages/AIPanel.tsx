@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BrainCircuit, MessageSquare, Send, Loader2, AlertTriangle, TrendingDown, Lightbulb, ArrowRight } from 'lucide-react';
 import AlertCard from '../components/ui/AlertCard';
 import { mockAlerts } from '../data/mockData';
@@ -32,6 +32,36 @@ export default function AIPanel() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [realAlerts, setRealAlerts] = useState<any[]>(mockAlerts);
+
+  useEffect(() => {
+    // 1. Fetch de Rentabilidad Real del Motor CFO
+    const hoy = new Date();
+    const hace7dias = new Date();
+    hace7dias.setDate(hoy.getDate() - 7);
+
+    const sd = hace7dias.toISOString().split('T')[0];
+    const ed = hoy.toISOString().split('T')[0];
+
+    fetch(`http://localhost:3000/api/finance/profitability?startDate=${sd}&endDate=${ed}`)
+      .then(res => res.json())
+      .then(json => {
+        if (json.success && json.data.criticalAlerts > 0) {
+           const newAlerts = json.data.details
+             .filter((d: any) => d.status === 'CRITICAL')
+             .map((d: any) => ({
+                severity: 'critical', 
+                type: 'low_margin',
+                title: `Pérdida en: ${d.treatmentName}`,
+                content: `Ingreso: $${d.revenue} vs Costo Real (Insumo + Sillón): $${d.totalCost}. Estás operando con margen de ${d.marginPercentage}.`,
+                recommendation: 'El CFO Automático recomienda subir el precio o reducir la duración de la cita urgentemente.',
+                module: 'dashboard'
+             }));
+           setRealAlerts([...newAlerts, ...mockAlerts].slice(0, 5)); // Mostrar mix
+        }
+      })
+      .catch(err => console.error("Error CFO API:", err));
+  }, []);
 
   const sendMessage = async (text: string) => {
     if (!text.trim() || loading) return;
@@ -56,7 +86,9 @@ export default function AIPanel() {
     <div className="ai-panel-page">
       <div className="page-header">
         <div>
-          <h1>🧠 CFO Digital</h1>
+          <h1 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <BrainCircuit size={32} color="#6366f1" /> CFO Digital
+          </h1>
           <p className="text-muted">Tu consultor financiero con inteligencia artificial</p>
         </div>
       </div>
@@ -125,14 +157,16 @@ export default function AIPanel() {
               <h3><AlertTriangle size={18} /> Alertas Activas</h3>
             </div>
             <div className="alerts-list">
-              {mockAlerts.map((alert, i) => (
+              {realAlerts.map((alert, i) => (
                 <AlertCard key={i} alert={alert} index={i} />
               ))}
             </div>
           </div>
 
           <div className="card card-glow">
-            <h4 style={{ marginBottom: '0.75rem' }}>💡 Resumen del CFO</h4>
+            <h4 style={{ marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Lightbulb size={20} color="#f59e0b" /> Resumen del CFO
+            </h4>
             <ul className="ai-summary-list">
               <li><span className="text-red">●</span> Margen crítico: necesitas acción inmediata</li>
               <li><span className="text-yellow">●</span> Materiales dentales: buscar proveedor alternativo</li>
