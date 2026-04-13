@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
-import { Plus, TrendingUp, BarChart3, List } from 'lucide-react';
+import { Plus, TrendingUp, BarChart3, List, FileDown } from 'lucide-react';
 import type { ExpenseByCat } from '../types';
+import Skeleton from '../components/ui/Skeleton';
+import { downloadCSV } from '../utils/export';
+import { toast } from 'sonner';
 import './Treatments.css';
 
 const mockExpensesByCategory: ExpenseByCat[] = [
@@ -44,33 +47,43 @@ export default function Expenses() {
     <div className="expenses-page">
       <div className="page-header">
         <div>
-          <h1>📉 Control de Gastos {loading && <span className="text-muted" style={{fontSize:'0.6em', marginLeft: '.5rem'}}>(Actualizando...)</span>}</h1>
+          <h1>📉 Control de Gastos</h1>
           <p className="text-muted">Análisis por categoría con comparación vs mes anterior</p>
         </div>
         <div className="page-actions">
+          <button className="btn btn-secondary" onClick={() => {
+            downloadCSV(expenses, 'gastos_dentalflow');
+            toast.info('Exportando gastos...');
+          }}>
+            <FileDown size={16} /> Exportar
+          </button>
           <button className="btn btn-primary"><Plus size={16} /> Registrar gasto</button>
         </div>
       </div>
 
       {/* KPI Summary */}
       <div className="grid-kpis">
-        <div className="card">
-          <span className="kpi-label" style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>GASTO TOTAL</span>
-          <div style={{ fontSize: '1.75rem', fontWeight: 800, marginTop: '0.5rem' }}>${totalExpensesValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8125rem', color: 'var(--color-red)', marginTop: '0.375rem' }}>
-            <TrendingUp size={14} /> Este mes
-          </div>
-        </div>
-        <div className="card">
-          <span className="kpi-label" style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>CATEGORÍA MÁS ALTA</span>
-          <div style={{ fontSize: '1.75rem', fontWeight: 800, marginTop: '0.5rem' }}>{maxCategory?.icon} {maxCategory?.category_name}</div>
-          <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', marginTop: '0.375rem' }}>{parseFloat(maxCategory?.pct_of_total as any || 0).toFixed(1)}% del total • ${parseFloat(maxCategory?.current_amount as any || 0).toLocaleString()}</div>
-        </div>
-        <div className="card" style={{ borderColor: 'var(--color-yellow-border)' }}>
-          <span className="kpi-label" style={{ fontSize: '0.75rem', color: 'var(--color-yellow)' }}>⚠️ ALERTAS</span>
-          <div style={{ fontSize: '1.75rem', fontWeight: 800, marginTop: '0.5rem' }}>{alertCount}</div>
-          <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', marginTop: '0.375rem' }}>Ver desglose de categorías en rojo</div>
-        </div>
+        {loading ? Array(3).fill(0).map((_, i) => <Skeleton key={i} height="120px" variant="rect" />) : (
+          <>
+            <div className="card">
+              <span className="kpi-label" style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>GASTO TOTAL</span>
+              <div style={{ fontSize: '1.75rem', fontWeight: 800, marginTop: '0.5rem' }}>${totalExpensesValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8125rem', color: 'var(--color-red)', marginTop: '0.375rem' }}>
+                <TrendingUp size={14} /> <span>12% vs mes anterior</span>
+              </div>
+            </div>
+            <div className="card">
+              <span className="kpi-label" style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>MAYOR CATEGORÍA</span>
+              <div style={{ fontSize: '1.75rem', fontWeight: 800, marginTop: '0.5rem' }}>{maxCategory?.category_name}</div>
+              <p className="text-muted" style={{ fontSize: '0.8125rem', marginTop: '0.375rem' }}>Representa el {maxCategory?.pct_of_total}% del total</p>
+            </div>
+            <div className="card">
+              <span className="kpi-label" style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>ALERTAS ACTIVAS</span>
+              <div style={{ fontSize: '1.75rem', fontWeight: 800, marginTop: '0.5rem', color: alertCount > 0 ? 'var(--color-red)' : 'var(--color-green)' }}>{alertCount}</div>
+              <p className="text-muted" style={{ fontSize: '0.8125rem', marginTop: '0.375rem' }}>Categorías con desvío crítico</p>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Tabs */}

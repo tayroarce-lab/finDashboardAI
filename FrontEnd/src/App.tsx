@@ -8,6 +8,8 @@ import Expenses from './pages/Expenses';
 import Appointments from './pages/Appointments';
 import Doctors from './pages/Doctors';
 import AIPanel from './pages/AIPanel';
+import Settings from './pages/Settings';
+import { Toaster } from 'sonner';
 import './index.css';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -20,27 +22,25 @@ function AppRoutes() {
   const { isAuthenticated } = useAuth();
 
   return (
-    <Routes>
-      <Route path="/login" element={
-        isAuthenticated ? <Navigate to="/" replace /> : <Login />
-      } />
-      <Route element={
-        <ProtectedRoute><MainLayout /></ProtectedRoute>
-      }>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/treatments" element={<Treatments />} />
-        <Route path="/expenses" element={<Expenses />} />
-        <Route path="/appointments" element={<Appointments />} />
-        <Route path="/doctors" element={<Doctors />} />
-        <Route path="/ai-panel" element={<AIPanel />} />
-        <Route path="/settings" element={
-          <div style={{ padding: '2rem' }}>
-            <h1>⚙️ Configuración</h1>
-            <p className="text-muted" style={{ marginTop: '0.5rem' }}>En construcción 🏗️</p>
-          </div>
+    <>
+      <Toaster position="top-right" richColors theme="dark" />
+      <Routes>
+        <Route path="/login" element={
+          isAuthenticated ? <Navigate to="/" replace /> : <Login />
         } />
-      </Route>
-    </Routes>
+        <Route element={
+          <ProtectedRoute><MainLayout /></ProtectedRoute>
+        }>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/treatments" element={<Treatments />} />
+          <Route path="/expenses" element={<Expenses />} />
+          <Route path="/appointments" element={<Appointments />} />
+          <Route path="/doctors" element={<Doctors />} />
+          <Route path="/ai-panel" element={<AIPanel />} />
+          <Route path="/settings" element={<Settings />} />
+        </Route>
+      </Routes>
+    </>
   );
 }
 

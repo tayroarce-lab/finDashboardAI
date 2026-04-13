@@ -3,8 +3,11 @@ import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid,
   Tooltip, Cell
 } from 'recharts';
-import { Plus, Filter, Star, Gem, Briefcase, Skull, CircleDollarSign, TrendingUp, DollarSign } from 'lucide-react';
+import { Plus, Filter, Star, Gem, Briefcase, Skull, CircleDollarSign, TrendingUp, DollarSign, FileDown } from 'lucide-react';
 import type { TreatmentProfitability } from '../types';
+import Skeleton from '../components/ui/Skeleton';
+import { downloadCSV } from '../utils/export';
+import { toast } from 'sonner';
 import './Treatments.css';
 
 // Mock profitability data
@@ -55,10 +58,16 @@ export default function Treatments() {
     <div className="treatments-page">
       <div className="page-header">
         <div>
-          <h1 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><CircleDollarSign size={28} color="#6366f1" /> Tratamientos & Rentabilidad {loading && <span className="text-muted" style={{fontSize:'0.6em', marginLeft: '.5rem'}}>(Actualizando...)</span>}</h1>
+          <h1 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><CircleDollarSign size={28} color="#6366f1" /> Tratamientos & Rentabilidad</h1>
           <p className="text-muted">Análisis de márgenes y estrategia de precios</p>
         </div>
         <div className="page-actions">
+          <button className="btn btn-secondary" onClick={() => {
+            downloadCSV(profitabilityData, 'tratamientos_dentalflow');
+            toast.info('Exportando tratamientos...');
+          }}>
+            <FileDown size={16} /> Exportar
+          </button>
           <button className="btn btn-secondary"><Filter size={16} /> Filtrar</button>
           <button className="btn btn-primary"><Plus size={16} /> Nuevo tratamiento</button>
         </div>
@@ -80,27 +89,30 @@ export default function Treatments() {
         <>
           {/* Quadrant Summary */}
           <div className="grid-kpis">
-            {(['star', 'gem', 'cow', 'trap'] as const).map(type => {
-              const items = activeData.filter(t => t.quadrant.type === type);
-              const labels: Record<string, { icon: React.FC<any>; name: string; desc: string }> = {
-                star: { icon: Star, name: 'Estrellas', desc: 'Alto margen + Alto volumen' },
-                gem: { icon: Gem, name: 'Joyas', desc: 'Alto margen + Bajo volumen' },
-                cow: { icon: Briefcase, name: 'Vacas', desc: 'Bajo margen + Alto volumen' },
-                trap: { icon: Skull, name: 'Trampas', desc: 'Bajo margen + Bajo volumen' },
-              };
-              const Icon = labels[type].icon;
-              return (
-                <div key={type} className="card quadrant-card" style={{ borderColor: quadrantColors[type] + '40' }}>
-                  <span className="quadrant-icon"><Icon size={24} color={quadrantColors[type]} /></span>
-                  <h4>{labels[type].name} ({items.length})</h4>
-                  <p className="text-muted" style={{ fontSize: '0.75rem' }}>{labels[type].desc}</p>
-                  <div className="quadrant-names">
-                    {items.map(t => <span key={t.id}>{t.name}</span>)}
-                    {items.length === 0 && <span className="text-muted">Ninguno</span>}
-                  </div>
-                </div>
-              );
-            })}
+            {loading 
+              ? Array(4).fill(0).map((_, i) => <Skeleton key={i} height="140px" variant="rect" />)
+              : (['star', 'gem', 'cow', 'trap'] as const).map(type => {
+                  const items = activeData.filter(t => t.quadrant.type === type);
+                  const labels: Record<string, { icon: React.FC<any>; name: string; desc: string }> = {
+                    star: { icon: Star, name: 'Estrellas', desc: 'Alto margen + Alto volumen' },
+                    gem: { icon: Gem, name: 'Joyas', desc: 'Alto margen + Bajo volumen' },
+                    cow: { icon: Briefcase, name: 'Vacas', desc: 'Bajo margen + Alto volumen' },
+                    trap: { icon: Skull, name: 'Trampas', desc: 'Bajo margen + Bajo volumen' },
+                  };
+                  const Icon = labels[type].icon;
+                  return (
+                    <div key={type} className="card quadrant-card" style={{ borderColor: quadrantColors[type] + '40' }}>
+                      <span className="quadrant-icon"><Icon size={24} color={quadrantColors[type]} /></span>
+                      <h4>{labels[type].name} ({items.length})</h4>
+                      <p className="text-muted" style={{ fontSize: '0.75rem' }}>{labels[type].desc}</p>
+                      <div className="quadrant-names">
+                        {items.map(t => <span key={t.id}>{t.name}</span>)}
+                        {items.length === 0 && <span className="text-muted">Ninguno</span>}
+                      </div>
+                    </div>
+                  );
+                })
+            }
           </div>
 
           {/* Margin Chart */}

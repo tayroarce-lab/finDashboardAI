@@ -7,6 +7,8 @@ import {
 import KPICard from '../components/ui/KPICard';
 import AlertCard from '../components/ui/AlertCard';
 import { mockKPIs, mockAlerts, mockTopTreatments, mockRevenueChart } from '../data/mockData';
+import Skeleton from '../components/ui/Skeleton';
+import { toast } from 'sonner';
 import './Dashboard.css';
 
 const periods = [
@@ -46,7 +48,10 @@ export default function Dashboard() {
       if (revRes.success) setRevenueChart(revRes.data);
       if (topRes.success) setTopTreatments(topRes.data);
       if (alertsRes.success) setAlerts(alertsRes.data);
-    }).catch(err => console.error("Error fetching dashboard data:", err))
+    }).catch(err => {
+      console.error("Error fetching dashboard data:", err);
+      toast.error('Error al cargar datos del dashboard');
+    })
       .finally(() => setLoading(false));
 
   }, [period]);
@@ -56,7 +61,7 @@ export default function Dashboard() {
       {/* Header */}
       <div className="dashboard-header">
         <div>
-          <h1>Dashboard Ejecutivo {loading && <span className="text-muted" style={{fontSize:'0.6em', marginLeft: '.5rem'}}>(Actualizando...)</span>}</h1>
+          <h1>Dashboard Ejecutivo</h1>
           <p className="text-muted">Clínica Dental Sonrisa — Resumen financiero</p>
         </div>
         <div className="dashboard-actions">
@@ -76,9 +81,10 @@ export default function Dashboard() {
 
       {/* KPI Cards */}
       <div className="grid-kpis">
-        {kpis.map((kpi, i) => (
-          <KPICard key={kpi.key} kpi={kpi} index={i} />
-        ))}
+        {loading 
+          ? Array(4).fill(0).map((_, i) => <Skeleton key={i} height="120px" variant="rect" />)
+          : kpis.map((kpi, i) => <KPICard key={kpi.key} kpi={kpi} index={i} />)
+        }
       </div>
 
       {/* Main Grid: Chart + AI Insight */}
@@ -90,41 +96,46 @@ export default function Dashboard() {
             <span className="text-muted" style={{ fontSize: '0.8125rem' }}>Últimos 30 días</span>
           </div>
           <div className="chart-container">
-            <ResponsiveContainer width="100%" height={280}>
-              <AreaChart data={revenueChart} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="gradientRevenue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="gradientExpenses" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#ef4444" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-                <XAxis
-                  dataKey="date" stroke="#64748b" fontSize={11}
-                  tickFormatter={(d) => new Date(d).getDate().toString()}
-                />
-                <YAxis stroke="#64748b" fontSize={11} tickFormatter={(v) => `$${v}`} />
-                <Tooltip
-                  contentStyle={{
-                    background: '#1a1f35', border: '1px solid rgba(255,255,255,0.1)',
-                    borderRadius: '10px', fontSize: '13px'
-                  }}
-                  formatter={(value: any, name: any) => [
-                    `$${parseFloat(value).toLocaleString()}`,
-                    name === 'revenue' ? 'Ingresos' : 'Gastos'
-                  ]}
-                  labelFormatter={(label) => new Date(label).toLocaleDateString('es')}
-                />
-                <Area type="monotone" dataKey="revenue" stroke="#6366f1" strokeWidth={2.5}
-                  fill="url(#gradientRevenue)" name="revenue" />
-                <Area type="monotone" dataKey="expenses" stroke="#ef4444" strokeWidth={2}
-                  fill="url(#gradientExpenses)" name="expenses" strokeDasharray="4 4" />
-              </AreaChart>
-            </ResponsiveContainer>
+            {loading ? (
+              <Skeleton height="280px" width="100%" />
+            ) : (
+              <ResponsiveContainer width="100%" height={280}>
+                {/* ... (rest of chart) ... */}
+                <AreaChart data={revenueChart} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="gradientRevenue" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="gradientExpenses" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#ef4444" stopOpacity={0.2} />
+                      <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
+                  <XAxis
+                    dataKey="date" stroke="#64748b" fontSize={11}
+                    tickFormatter={(d) => new Date(d).getDate().toString()}
+                  />
+                  <YAxis stroke="#64748b" fontSize={11} tickFormatter={(v) => `$${v}`} />
+                  <Tooltip
+                    contentStyle={{
+                      background: '#1a1f35', border: '1px solid rgba(255,255,255,0.1)',
+                      borderRadius: '10px', fontSize: '13px'
+                    }}
+                    formatter={(value: any, name: any) => [
+                      `$${parseFloat(value).toLocaleString()}`,
+                      name === 'revenue' ? 'Ingresos' : 'Gastos'
+                    ]}
+                    labelFormatter={(label) => new Date(label).toLocaleDateString('es')}
+                  />
+                  <Area type="monotone" dataKey="revenue" stroke="#6366f1" strokeWidth={2.5}
+                    fill="url(#gradientRevenue)" name="revenue" />
+                  <Area type="monotone" dataKey="expenses" stroke="#ef4444" strokeWidth={2}
+                    fill="url(#gradientExpenses)" name="expenses" strokeDasharray="4 4" />
+                </AreaChart>
+              </ResponsiveContainer>
+            )}
           </div>
         </div>
 

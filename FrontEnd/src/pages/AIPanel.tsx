@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { BrainCircuit, MessageSquare, Send, AlertTriangle, Lightbulb } from 'lucide-react';
+import { BrainCircuit, MessageSquare, Send, AlertTriangle, Lightbulb, RefreshCw } from 'lucide-react';
+import { toast } from 'sonner';
 import AlertCard from '../components/ui/AlertCard';
 import { mockAlerts } from '../data/mockData';
 import './AIPanel.css';
@@ -60,8 +61,25 @@ export default function AIPanel() {
            setRealAlerts([...newAlerts, ...mockAlerts].slice(0, 5)); // Mostrar mix
         }
       })
-      .catch(err => console.error("Error CFO API:", err));
+      }).catch(err => {
+      console.error("Error CFO API:", err);
+      toast.error('Error al conectar con el motor de IA');
+    });
   }, []);
+
+  const triggerAnalysis = async () => {
+    setLoading(true);
+    toast.promise(
+      fetch('https://onlyautotask-n8n.tuoaro.easypanel.host/webhook/trigger-cfo-analysis', { 
+        method: 'POST' 
+      }),
+      {
+        loading: 'El CFO Digital está analizando tu base de datos...',
+        success: 'Análisis completado. Nuevos insights guardados en tu panel.',
+        error: 'Error al iniciar análisis. Verifica la conexión con n8n.'
+      }
+    ).finally(() => setLoading(false));
+  };
 
   const sendMessage = async (text: string) => {
     if (!text.trim() || loading) return;
@@ -90,6 +108,17 @@ export default function AIPanel() {
             <BrainCircuit size={32} color="#6366f1" /> CFO Digital
           </h1>
           <p className="text-muted">Tu consultor financiero con inteligencia artificial</p>
+        </div>
+        <div className="page-actions">
+          <button 
+            className="btn btn-primary" 
+            onClick={triggerAnalysis} 
+            disabled={loading}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+          >
+            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} /> 
+            {loading ? 'Analizando...' : 'Ejecutar Análisis Completo'}
+          </button>
         </div>
       </div>
 
