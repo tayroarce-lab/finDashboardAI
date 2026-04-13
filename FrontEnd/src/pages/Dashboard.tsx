@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BrainCircuit, Bell, TrendingUp, ArrowRight, Trophy } from 'lucide-react';
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis,
@@ -23,13 +23,40 @@ const MARGIN_COLORS = {
 
 export default function Dashboard() {
   const [period, setPeriod] = useState('month');
+  const [kpis, setKpis] = useState(mockKPIs);
+  const [revenueChart, setRevenueChart] = useState(mockRevenueChart);
+  const [topTreatments, setTopTreatments] = useState(mockTopTreatments);
+  const [alerts, setAlerts] = useState(mockAlerts);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const token = localStorage.getItem('df_token');
+    if (!token) return;
+
+    setLoading(true);
+    const headers = { 'Authorization': `Bearer ${token}` };
+
+    Promise.all([
+      fetch(`http://localhost:3000/api/dashboard/kpis?period=${period}`, { headers }).then(res => res.json()),
+      fetch(`http://localhost:3000/api/dashboard/revenue-chart?period=${period}`, { headers }).then(res => res.json()),
+      fetch(`http://localhost:3000/api/dashboard/top-treatments?period=${period}`, { headers }).then(res => res.json()),
+      fetch(`http://localhost:3000/api/dashboard/alerts`, { headers }).then(res => res.json())
+    ]).then(([kpiRes, revRes, topRes, alertsRes]) => {
+      if (kpiRes.success) setKpis(kpiRes.data.kpis);
+      if (revRes.success) setRevenueChart(revRes.data);
+      if (topRes.success) setTopTreatments(topRes.data);
+      if (alertsRes.success) setAlerts(alertsRes.data);
+    }).catch(err => console.error("Error fetching dashboard data:", err))
+      .finally(() => setLoading(false));
+
+  }, [period]);
 
   return (
     <div className="dashboard">
       {/* Header */}
       <div className="dashboard-header">
         <div>
-          <h1>Dashboard Ejecutivo</h1>
+          <h1>Dashboard Ejecutivo {loading && <span className="text-muted" style={{fontSize:'0.6em', marginLeft: '.5rem'}}>(Actualizando...)</span>}</h1>
           <p className="text-muted">Clínica Dental Sonrisa — Resumen financiero</p>
         </div>
         <div className="dashboard-actions">
@@ -49,7 +76,7 @@ export default function Dashboard() {
 
       {/* KPI Cards */}
       <div className="grid-kpis">
-        {mockKPIs.map((kpi, i) => (
+        {kpis.map((kpi, i) => (
           <KPICard key={kpi.key} kpi={kpi} index={i} />
         ))}
       </div>
@@ -64,7 +91,7 @@ export default function Dashboard() {
           </div>
           <div className="chart-container">
             <ResponsiveContainer width="100%" height={280}>
-              <AreaChart data={mockRevenueChart} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+              <AreaChart data={revenueChart} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="gradientRevenue" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
@@ -86,8 +113,8 @@ export default function Dashboard() {
                     background: '#1a1f35', border: '1px solid rgba(255,255,255,0.1)',
                     borderRadius: '10px', fontSize: '13px'
                   }}
-                  formatter={(value: number, name: string) => [
-                    `$${value.toLocaleString()}`,
+                  formatter={(value: any, name: any) => [
+                    `$${parseFloat(value).toLocaleString()}`,
                     name === 'revenue' ? 'Ingresos' : 'Gastos'
                   ]}
                   labelFormatter={(label) => new Date(label).toLocaleDateString('es')}
@@ -136,7 +163,7 @@ export default function Dashboard() {
           </div>
           <div className="chart-container">
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={mockTopTreatments.slice(0, 6)} layout="vertical"
+              <BarChart data={topTreatments.slice(0, 6)} layout="vertical"
                 margin={{ top: 5, right: 30, left: 80, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
                 <XAxis type="number" stroke="#64748b" fontSize={11}
@@ -148,10 +175,10 @@ export default function Dashboard() {
                     background: '#1a1f35', border: '1px solid rgba(255,255,255,0.1)',
                     borderRadius: '10px', fontSize: '13px'
                   }}
-                  formatter={(value: number) => [`${value}%`, 'Margen']}
+                  formatter={(value: any) => [`${value}%`, 'Margen']}
                 />
                 <Bar dataKey="avgMargin" radius={[0, 6, 6, 0]} barSize={24}>
-                  {mockTopTreatments.slice(0, 6).map((t, i) => (
+                  {topTreatments.slice(0, 6).map((t, i) => (
                     <Cell key={i} fill={
                       t.avgMargin >= 60 ? MARGIN_COLORS.high :
                       t.avgMargin >= 40 ? MARGIN_COLORS.mid : MARGIN_COLORS.low
@@ -166,10 +193,10 @@ export default function Dashboard() {
         {/* Alerts */}
         <div className="card animate-fade-in stagger-6">
           <div className="card-header">
-            <h3><Bell size={18} /> Alertas Activas ({mockAlerts.length})</h3>
+            <h3><Bell size={18} /> Alertas Activas ({alerts.length})</h3>
           </div>
           <div className="alerts-list">
-            {mockAlerts.map((alert, i) => (
+            {alerts.map((alert, i) => (
               <AlertCard key={i} alert={alert} index={i} />
             ))}
           </div>

@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Stethoscope, Receipt, CalendarDays,
-  BrainCircuit, Settings, LogOut, Activity
+  BrainCircuit, Settings, LogOut, Activity, Users
 } from 'lucide-react';
 import './Sidebar.css';
 
@@ -10,6 +10,7 @@ const navItems = [
   { to: '/treatments', icon: Stethoscope, label: 'Tratamientos' },
   { to: '/expenses', icon: Receipt, label: 'Gastos' },
   { to: '/appointments', icon: CalendarDays, label: 'Agenda' },
+  { to: '/doctors', icon: Users, label: 'Doctores' },
   { to: '/ai-panel', icon: BrainCircuit, label: 'CFO Digital' },
 ];
 

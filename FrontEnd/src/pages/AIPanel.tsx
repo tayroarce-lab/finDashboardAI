@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BrainCircuit, MessageSquare, Send, Loader2, AlertTriangle, TrendingDown, Lightbulb, ArrowRight } from 'lucide-react';
+import { BrainCircuit, MessageSquare, Send, AlertTriangle, Lightbulb } from 'lucide-react';
 import AlertCard from '../components/ui/AlertCard';
 import { mockAlerts } from '../data/mockData';
 import './AIPanel.css';

@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  Tooltip, Cell, ScatterChart, Scatter, ZAxis, Legend
+  Tooltip, Cell
 } from 'recharts';
-import { Plus, Search, DollarSign, TrendingUp, Filter, Star, Gem, Briefcase, Skull, CircleDollarSign } from 'lucide-react';
+import { Plus, Filter, Star, Gem, Briefcase, Skull, CircleDollarSign, TrendingUp, DollarSign } from 'lucide-react';
 import type { TreatmentProfitability } from '../types';
 import './Treatments.css';
 
@@ -27,13 +27,35 @@ const quadrantColors: Record<string, string> = {
 
 export default function Treatments() {
   const [tab, setTab] = useState<'catalog' | 'profitability'>('profitability');
-  const activeData = mockProfitability.filter(t => t.times_performed > 0);
+  const [profitabilityData, setProfitabilityData] = useState<TreatmentProfitability[]>(mockProfitability);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const token = localStorage.getItem('df_token');
+    if (!token) return;
+
+    fetch('http://localhost:3000/api/treatments/analysis/profitability', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+      .then(res => res.json())
+      .then(json => {
+        if (json.success && json.data) {
+          // Si el backend devuelve camelCase o la DB trae variaciones, lo intentamos empatar:
+          // Como n8n y DashboardService leían snake_case o camel, asumimos que respeta TreatmentProfitability.
+          setProfitabilityData(json.data);
+        }
+      })
+      .catch(err => console.error("Error fetching treatments data:", err))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const activeData = profitabilityData.filter(t => t.times_performed > 0);
 
   return (
     <div className="treatments-page">
       <div className="page-header">
         <div>
-          <h1 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><CircleDollarSign size={28} color="#6366f1" /> Tratamientos & Rentabilidad</h1>
+          <h1 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><CircleDollarSign size={28} color="#6366f1" /> Tratamientos & Rentabilidad {loading && <span className="text-muted" style={{fontSize:'0.6em', marginLeft: '.5rem'}}>(Actualizando...)</span>}</h1>
           <p className="text-muted">Análisis de márgenes y estrategia de precios</p>
         </div>
         <div className="page-actions">
@@ -94,7 +116,7 @@ export default function Treatments() {
                 <YAxis type="category" dataKey="name" stroke="#94a3b8" fontSize={12} width={95} />
                 <Tooltip
                   contentStyle={{ background: '#1a1f35', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', fontSize: '13px' }}
-                  formatter={(v: number, _: string, p: any) => [`${v}% (${p.payload.times_performed} realizados)`, 'Margen']}
+                  formatter={(v: any, _: any, p: any) => [`${parseFloat(v).toFixed(1)}% (${p.payload.times_performed} realizados)`, 'Margen']}
                 />
                 <Bar dataKey="avg_margin_pct" radius={[0, 6, 6, 0]} barSize={20}>
                   {activeData.map((t, i) => (
@@ -124,15 +146,15 @@ export default function Treatments() {
                   </tr>
                 </thead>
                 <tbody>
-                  {mockProfitability.map(t => (
+                  {profitabilityData.map(t => (
                     <tr key={t.id}>
                       <td><strong>{t.name}</strong><br/><span className="text-muted" style={{fontSize:'0.75rem'}}>{t.category}</span></td>
-                      <td>{t.times_performed}</td>
-                      <td>${t.avg_revenue.toFixed(2)}</td>
-                      <td>${t.avg_cost.toFixed(2)}</td>
-                      <td><span className={`badge badge-${t.avg_margin_pct >= 50 ? 'green' : t.avg_margin_pct >= 30 ? 'yellow' : 'red'}`}>{t.avg_margin_pct}%</span></td>
-                      <td className="text-accent">${t.total_profit_contribution.toFixed(2)}</td>
-                      <td>{t.quadrant.label}</td>
+                      <td>{t.times_performed || 0}</td>
+                      <td>${(t.avg_revenue || 0).toFixed(2)}</td>
+                      <td>${(t.avg_cost || 0).toFixed(2)}</td>
+                      <td><span className={`badge badge-${(t.avg_margin_pct || 0) >= 50 ? 'green' : (t.avg_margin_pct || 0) >= 30 ? 'yellow' : 'red'}`}>{(t.avg_margin_pct || 0).toFixed(1)}%</span></td>
+                      <td className="text-accent">${(t.total_profit_contribution || 0).toFixed(2)}</td>
+                      <td>{t.quadrant?.label || '-'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -149,13 +171,13 @@ export default function Treatments() {
                 <tr><th>Nombre</th><th>Categoría</th><th>Precio</th><th>Costo Est.</th><th>Margen Est.</th><th>Duración</th></tr>
               </thead>
               <tbody>
-                {mockProfitability.map(t => (
+                {profitabilityData.map(t => (
                   <tr key={t.id}>
                     <td><strong>{t.name}</strong></td>
                     <td><span className="badge badge-green">{t.category}</span></td>
-                    <td>${t.catalog_price.toFixed(2)}</td>
-                    <td>${t.estimated_cost.toFixed(2)}</td>
-                    <td>{((1 - t.estimated_cost / t.catalog_price) * 100).toFixed(0)}%</td>
+                    <td>${(t.catalog_price || 0).toFixed(2)}</td>
+                    <td>${(t.estimated_cost || 0).toFixed(2)}</td>
+                    <td>{((1 - (t.estimated_cost || 0) / (t.catalog_price || 1)) * 100).toFixed(0)}%</td>
                     <td>60 min</td>
                   </tr>
                 ))}

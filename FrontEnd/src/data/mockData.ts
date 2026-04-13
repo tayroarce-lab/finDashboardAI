@@ -1,4 +1,4 @@
-import type { KPI, Alert, TopTreatment, RevenueChartPoint } from '../../types';
+import type { KPI, Alert, TopTreatment, RevenueChartPoint } from '../types';
 
 // ═══════════════════════════════════════════════
 // Mock Data — Funciona sin backend

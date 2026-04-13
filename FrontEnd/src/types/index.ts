@@ -132,7 +132,6 @@ export interface TopTreatment {
   semaphore: Semaphore;
 }
 
-// ─── Alerts ─────────────────────────────────────
 export interface Alert {
   severity: 'critical' | 'warning' | 'info' | 'positive';
   type: string;
@@ -141,6 +140,33 @@ export interface Alert {
   recommendation: string;
   module?: string;
   entityId?: number;
+}
+
+// ─── Doctors & Agenda ───────────────────────────
+export interface DoctorPerformance {
+  id: number;
+  name: string;
+  specialty: string;
+  color: string;
+  stats: {
+    appointments: number;
+    completed: number;
+    revenue: number;
+    minutes: number;
+    revenuePerHour: number;
+    efficiency: number;
+  };
+}
+
+export interface AppointmentSlot {
+  id: number;
+  time: string;
+  patient: string;
+  treatment: string;
+  status: 'scheduled' | 'confirmed' | 'completed' | 'cancelled' | 'no_show';
+  price: number;
+  doctor_id?: number;
+  doctor_name?: string;
 }
 
 // ─── API Response ───────────────────────────────

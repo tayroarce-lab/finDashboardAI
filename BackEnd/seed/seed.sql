@@ -13,6 +13,12 @@ VALUES ('Clínica Dental Sonrisa', 3, '08:00', '17:00', '1,2,3,4,5', 60, 'USD');
 INSERT INTO users (clinic_id, name, email, password_hash, role)
 VALUES (1, 'Dr. Carlos Méndez', 'carlos@sonrisa.com', '$2b$10$8K1p/a0dR1xqM8K3hq3lqeKiLnDYxpM9s.m91vO3Q4w3E5pY8GWXO', 'owner');
 
+-- ─── Doctors ──────────────────────────────────
+INSERT INTO doctors (clinic_id, name, specialty, color) VALUES
+(1, 'Dra. Elena Rivas', 'Odontopediatría', '#ec4899'),
+(1, 'Dr. Roberto Soto', 'Endodoncia', '#8b5cf6'),
+(1, 'Dra. Lucía Paz', 'General', '#10b981');
+
 -- ─── Categorías de Gastos ───────────────────
 INSERT INTO expense_categories (clinic_id, name, icon, is_default) VALUES
 (1, 'Nómina', '👥', TRUE),
@@ -90,9 +96,16 @@ INSERT INTO treatment_records (clinic_id, treatment_id, patient_id, price_charge
 (1, 1, 7, 45.00, 0, 18.00, 'cash', DATE_SUB(CURDATE(), INTERVAL 5 DAY)),
 (1, 10, 8, 120.00, 0, 35.00, 'transfer', DATE_SUB(CURDATE(), INTERVAL 5 DAY)),
 (1, 5, 1, 180.00, 0, 75.00, 'card', DATE_SUB(CURDATE(), INTERVAL 4 DAY)),
-(1, 3, 2, 95.00, 0, 38.00, 'cash', DATE_SUB(CURDATE(), INTERVAL 3 DAY)),
 (1, 1, 3, 45.00, 0, 18.00, 'cash', DATE_SUB(CURDATE(), INTERVAL 2 DAY)),
 (1, 7, 4, 380.00, 0, 160.00, 'card', DATE_SUB(CURDATE(), INTERVAL 1 DAY));
+
+-- ─── Appointments (Agenda) ──────────────────
+INSERT INTO appointments (clinic_id, doctor_id, patient_id, treatment_id, start_time, end_time, status) VALUES
+(1, 1, 1, 1, DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 2 DAY), INTERVAL 9 HOUR), DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 2 DAY), INTERVAL 10 HOUR), 'completed'),
+(1, 2, 2, 6, DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 1 DAY), INTERVAL 10 HOUR), DATE_ADD(DATE_SUB(CURDATE(), INTERVAL 1 DAY), INTERVAL 12 HOUR), 'completed'),
+(1, 3, 3, 3, DATE_ADD(CURDATE(), INTERVAL 9 HOUR), DATE_ADD(CURDATE(), INTERVAL 10 HOUR), 'confirmed'),
+(1, 1, 4, 7, DATE_ADD(CURDATE(), INTERVAL 11 HOUR), DATE_ADD(CURDATE(), INTERVAL 13 HOUR), 'scheduled'),
+(1, 2, 5, 6, DATE_ADD(DATE_ADD(CURDATE(), INTERVAL 1 DAY), INTERVAL 14 HOUR), DATE_ADD(DATE_ADD(CURDATE(), INTERVAL 1 DAY), INTERVAL 15 HOUR), 'scheduled');
 
 -- ─── Gastos del Mes ─────────────────────────
 INSERT INTO expenses (clinic_id, category_id, amount, vendor, expense_date, is_recurring, recurrence_frequency) VALUES

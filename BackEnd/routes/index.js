@@ -9,6 +9,7 @@ const expenseRoutes = require('./expenseRoutes');
 const appointmentRoutes = require('./appointmentRoutes');
 const dashboardRoutes = require('./dashboardRoutes');
 const financialRoutes = require('./financialRoutes');
+const doctorRoutes = require('./doctorRoutes');
 
 const router = Router();
 
@@ -25,5 +26,6 @@ router.use('/patients', patientRoutes);
 router.use('/expenses', expenseRoutes);
 router.use('/appointments', appointmentRoutes);
 router.use('/dashboard', dashboardRoutes);
+router.use('/doctors', doctorRoutes);
 
 module.exports = router;

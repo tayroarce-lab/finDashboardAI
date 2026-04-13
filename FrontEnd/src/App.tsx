@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import Treatments from './pages/Treatments';
 import Expenses from './pages/Expenses';
 import Appointments from './pages/Appointments';
+import Doctors from './pages/Doctors';
 import AIPanel from './pages/AIPanel';
 import './index.css';
 
@@ -30,6 +31,7 @@ function AppRoutes() {
         <Route path="/treatments" element={<Treatments />} />
         <Route path="/expenses" element={<Expenses />} />
         <Route path="/appointments" element={<Appointments />} />
+        <Route path="/doctors" element={<Doctors />} />
         <Route path="/ai-panel" element={<AIPanel />} />
         <Route path="/settings" element={
           <div style={{ padding: '2rem' }}>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Clock, User, Plus, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import './Appointments.css';
 
@@ -23,35 +23,17 @@ const statusConfig = {
 const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'];
 const hours = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00'];
 
-const mockSchedule: Record<string, AppointmentSlot[]> = {
-  Lunes: [
-    { id: 1, time: '09:00', patient: 'María García', treatment: 'Limpieza dental', status: 'confirmed', price: 45 },
-    { id: 2, time: '10:00', patient: 'Juan Rodríguez', treatment: 'Resina compuesta', status: 'confirmed', price: 95 },
-    { id: 3, time: '14:00', patient: 'Ana López', treatment: 'Corona dental', status: 'scheduled', price: 380 },
-  ],
-  Martes: [
-    { id: 4, time: '08:00', patient: 'Carlos Hernández', treatment: 'Endodoncia', status: 'completed', price: 280 },
-  ],
-  Miércoles: [
-    { id: 5, time: '09:00', patient: 'Laura Martínez', treatment: 'Limpieza dental', status: 'confirmed', price: 45 },
-    { id: 6, time: '11:00', patient: 'Pedro Sánchez', treatment: 'Blanqueamiento', status: 'confirmed', price: 200 },
-    { id: 7, time: '15:00', patient: 'Sofía Ramírez', treatment: 'Extracción muela', status: 'scheduled', price: 180 },
-  ],
-  Jueves: [
-    { id: 8, time: '08:00', patient: 'Diego Torres', treatment: 'Ortodoncia', status: 'confirmed', price: 120 },
-    { id: 9, time: '10:00', patient: 'María García', treatment: 'Resina compuesta', status: 'scheduled', price: 95 },
-  ],
-  Viernes: [
-    { id: 10, time: '09:00', patient: 'Juan Rodríguez', treatment: 'Limpieza dental', status: 'scheduled', price: 45 },
-  ],
-};
 
-const totalSlots = days.length * hours.length;
-const bookedSlots = Object.values(mockSchedule).flat().length;
-const occupancyRate = ((bookedSlots / totalSlots) * 100).toFixed(0);
+
+
 
 export default function Appointments() {
   const [weekOffset, setWeekOffset] = useState(0);
+  const [schedule, setSchedule] = useState<Record<string, AppointmentSlot[]>>({});
+  const [occupancy, setOccupancy] = useState<any>({
+    totalCapacity: 0, booked: 0, completed: 0, cancelled: 0, noShows: 0, emptySlots: 0, occupancyRate: 0, cancellationRate: 0
+  });
+  const [loading, setLoading] = useState(true);
 
   const getWeekDates = () => {
     const now = new Date();
@@ -67,11 +49,57 @@ export default function Appointments() {
 
   const weekDates = getWeekDates();
 
+  useEffect(() => {
+    const token = localStorage.getItem('df_token');
+    if (!token) return;
+
+    setLoading(true);
+    const headers = { 'Authorization': `Bearer ${token}` };
+
+    Promise.all([
+      fetch(`http://localhost:3000/api/appointments?weekOffset=${weekOffset}`, { headers }).then(res => res.json()),
+      fetch(`http://localhost:3000/api/appointments/occupancy?period=week`, { headers }).then(res => res.json())
+    ]).then(([schedRes, occRes]) => {
+      if (occRes.success && occRes.data) {
+        setOccupancy(occRes.data);
+      }
+      if (schedRes.success && schedRes.data) {
+        // Mapear plano a Record<Dia, Slots>
+        const grouped: Record<string, AppointmentSlot[]> = { Lunes: [], Martes: [], Miércoles: [], Jueves: [], Viernes: [] };
+        
+        schedRes.data.forEach((apt: any) => {
+          const date = new Date(apt.start_time);
+          const dayName = date.toLocaleDateString('es', { weekday: 'long' });
+          const dayCap = dayName.charAt(0).toUpperCase() + dayName.slice(1);
+          const timeStr = date.toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+
+          const slot: AppointmentSlot = {
+            id: apt.id,
+            time: timeStr.includes(':00') ? timeStr : timeStr.split(':')[0] + ':00', // redondear a la hora
+            patient: apt.patient_name || 'Paciente',
+            treatment: apt.treatment_name || 'Consulta',
+            status: apt.status || 'scheduled',
+            price: parseFloat(apt.treatment_price || 0)
+          };
+          
+          if (grouped[dayCap]) {
+            grouped[dayCap].push(slot);
+          } else if (dayCap === 'Miercoles') {
+            grouped['Miércoles'].push(slot); // Fix tilde
+          }
+        });
+        setSchedule(grouped);
+      }
+    }).catch(err => console.error("Error fetching appointments:", err))
+      .finally(() => setLoading(false));
+
+  }, [weekOffset]);
+
   return (
     <div className="appointments-page">
       <div className="page-header">
         <div>
-          <h1>📅 Agenda & Ocupación</h1>
+          <h1>📅 Agenda & Ocupación {loading && <span className="text-muted" style={{fontSize:'0.6em', marginLeft: '.5rem'}}>(Actualizando...)</span>}</h1>
           <p className="text-muted">Vista semanal de citas y análisis de ocupación</p>
         </div>
         <div className="page-actions">
@@ -83,25 +111,27 @@ export default function Appointments() {
       <div className="grid-kpis">
         <div className="card">
           <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>OCUPACIÓN</span>
-          <div style={{ fontSize: '1.75rem', fontWeight: 800, marginTop: '0.5rem' }}>{occupancyRate}%</div>
-          <div className="badge badge-yellow" style={{ marginTop: '0.5rem' }}>Mejorable</div>
+          <div style={{ fontSize: '1.75rem', fontWeight: 800, marginTop: '0.5rem' }}>{occupancy.occupancyRate}%</div>
+          <div className={`badge badge-${occupancy.occupancyRate > 75 ? 'green' : 'yellow'}`} style={{ marginTop: '0.5rem' }}>
+            {occupancy.occupancyRate > 75 ? 'Óptima' : 'Mejorable'}
+          </div>
         </div>
         <div className="card">
           <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>CITAS ESTA SEMANA</span>
-          <div style={{ fontSize: '1.75rem', fontWeight: 800, marginTop: '0.5rem' }}>{bookedSlots}</div>
-          <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', marginTop: '0.375rem' }}>de {totalSlots} slots disponibles</div>
+          <div style={{ fontSize: '1.75rem', fontWeight: 800, marginTop: '0.5rem' }}>{occupancy.booked}</div>
+          <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', marginTop: '0.375rem' }}>de {occupancy.totalCapacity} slots disponibles</div>
         </div>
         <div className="card">
           <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>INGRESOS PROYECTADOS</span>
-          <div style={{ fontSize: '1.75rem', fontWeight: 800, marginTop: '0.5rem' }}>${Object.values(mockSchedule).flat().reduce((s, a) => s + a.price, 0).toLocaleString()}</div>
+          <div style={{ fontSize: '1.75rem', fontWeight: 800, marginTop: '0.5rem' }}>${Object.values(schedule).flat().reduce((s, a) => s + a.price, 0).toLocaleString()}</div>
           <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', marginTop: '0.375rem' }}>basado en citas agendadas</div>
         </div>
         <div className="card" style={{ borderColor: 'var(--color-yellow-border)' }}>
           <span style={{ fontSize: '0.75rem', color: 'var(--color-yellow)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>OPORTUNIDAD PERDIDA</span>
           <div style={{ fontSize: '1.75rem', fontWeight: 800, marginTop: '0.5rem', color: 'var(--color-yellow)' }}>
-            ${((totalSlots - bookedSlots) * 175).toLocaleString()}
+            ${(occupancy.emptySlots * 175).toLocaleString()}
           </div>
-          <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', marginTop: '0.375rem' }}>{totalSlots - bookedSlots} huecos × $175 ticket prom.</div>
+          <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', marginTop: '0.375rem' }}>{occupancy.emptySlots} huecos × $175 ticket prom.</div>
         </div>
       </div>
 
@@ -135,7 +165,7 @@ export default function Appointments() {
             <>
               <div key={`t-${hour}`} className="schedule-time-cell">{hour}</div>
               {days.map(day => {
-                const appointment = mockSchedule[day]?.find(a => a.time === hour);
+                const appointment = schedule[day]?.find(a => a.time === hour);
                 return (
                   <div key={`${day}-${hour}`} className={`schedule-cell ${appointment ? 'schedule-cell-booked' : ''}`}>
                     {appointment && (

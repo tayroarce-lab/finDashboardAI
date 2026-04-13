@@ -110,10 +110,24 @@ CREATE TABLE IF NOT EXISTS expenses (
     FOREIGN KEY (category_id) REFERENCES expense_categories(id) ON DELETE RESTRICT
 );
 
+-- ─── Doctors ──────────────────────────────────
+CREATE TABLE IF NOT EXISTS doctors (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    clinic_id INT NOT NULL,
+    name VARCHAR(150) NOT NULL,
+    specialty VARCHAR(100),
+    color VARCHAR(7) DEFAULT '#6366f1',
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (clinic_id) REFERENCES clinics(id) ON DELETE CASCADE
+);
+
 -- ─── Appointments ───────────────────────────
 CREATE TABLE IF NOT EXISTS appointments (
     id INT AUTO_INCREMENT PRIMARY KEY,
     clinic_id INT NOT NULL,
+    doctor_id INT,
     patient_id INT,
     treatment_id INT,
     start_time DATETIME NOT NULL,
@@ -124,6 +138,7 @@ CREATE TABLE IF NOT EXISTS appointments (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (clinic_id) REFERENCES clinics(id) ON DELETE CASCADE,
+    FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE SET NULL,
     FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE SET NULL,
     FOREIGN KEY (treatment_id) REFERENCES treatments(id) ON DELETE SET NULL
 );

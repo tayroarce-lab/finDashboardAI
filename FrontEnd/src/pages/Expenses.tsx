@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
-import { Plus, TrendingDown, TrendingUp, BarChart3, List } from 'lucide-react';
+import { Plus, TrendingUp, BarChart3, List } from 'lucide-react';
 import type { ExpenseByCat } from '../types';
 import './Treatments.css';
 
@@ -14,16 +14,37 @@ const mockExpensesByCategory: ExpenseByCat[] = [
 ];
 
 const PIE_COLORS = ['#6366f1', '#8b5cf6', '#a78bfa', '#c4b5fd', '#10b981', '#f59e0b', '#ef4444'];
-const totalExpenses = mockExpensesByCategory.reduce((s, c) => s + c.current_amount, 0);
-
 export default function Expenses() {
   const [view, setView] = useState<'breakdown' | 'list'>('breakdown');
+  const [expenses, setExpenses] = useState<ExpenseByCat[]>(mockExpensesByCategory);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const token = localStorage.getItem('df_token');
+    if (!token) return;
+
+    fetch('http://localhost:3000/api/expenses/by-category?period=month', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+      .then(res => res.json())
+      .then(json => {
+        if (json.success && json.data) {
+          setExpenses(json.data);
+        }
+      })
+      .catch(err => console.error("Error fetching expenses data:", err))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const totalExpensesValue = expenses.reduce((s, c) => s + parseFloat(c.current_amount as any), 0);
+  const maxCategory = expenses.reduce((max, c) => parseFloat(c.current_amount as any) > parseFloat(max.current_amount as any) ? c : max, expenses[0] || mockExpensesByCategory[0]);
+  const alertCount = expenses.filter(c => c.has_alert).length;
 
   return (
     <div className="expenses-page">
       <div className="page-header">
         <div>
-          <h1>📉 Control de Gastos</h1>
+          <h1>📉 Control de Gastos {loading && <span className="text-muted" style={{fontSize:'0.6em', marginLeft: '.5rem'}}>(Actualizando...)</span>}</h1>
           <p className="text-muted">Análisis por categoría con comparación vs mes anterior</p>
         </div>
         <div className="page-actions">
@@ -35,20 +56,20 @@ export default function Expenses() {
       <div className="grid-kpis">
         <div className="card">
           <span className="kpi-label" style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>GASTO TOTAL</span>
-          <div style={{ fontSize: '1.75rem', fontWeight: 800, marginTop: '0.5rem' }}>${totalExpenses.toLocaleString()}</div>
+          <div style={{ fontSize: '1.75rem', fontWeight: 800, marginTop: '0.5rem' }}>${totalExpensesValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8125rem', color: 'var(--color-red)', marginTop: '0.375rem' }}>
-            <TrendingUp size={14} /> +3.1% vs anterior
+            <TrendingUp size={14} /> Este mes
           </div>
         </div>
         <div className="card">
           <span className="kpi-label" style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>CATEGORÍA MÁS ALTA</span>
-          <div style={{ fontSize: '1.75rem', fontWeight: 800, marginTop: '0.5rem' }}>👥 Nómina</div>
-          <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', marginTop: '0.375rem' }}>49.7% del total • $3,200</div>
+          <div style={{ fontSize: '1.75rem', fontWeight: 800, marginTop: '0.5rem' }}>{maxCategory?.icon} {maxCategory?.category_name}</div>
+          <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', marginTop: '0.375rem' }}>{parseFloat(maxCategory?.pct_of_total as any || 0).toFixed(1)}% del total • ${parseFloat(maxCategory?.current_amount as any || 0).toLocaleString()}</div>
         </div>
         <div className="card" style={{ borderColor: 'var(--color-yellow-border)' }}>
           <span className="kpi-label" style={{ fontSize: '0.75rem', color: 'var(--color-yellow)' }}>⚠️ ALERTAS</span>
-          <div style={{ fontSize: '1.75rem', fontWeight: 800, marginTop: '0.5rem' }}>2</div>
-          <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', marginTop: '0.375rem' }}>Materiales +23% • Equipo nuevo</div>
+          <div style={{ fontSize: '1.75rem', fontWeight: 800, marginTop: '0.5rem' }}>{alertCount}</div>
+          <div style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', marginTop: '0.375rem' }}>Ver desglose de categorías en rojo</div>
         </div>
       </div>
 
@@ -68,23 +89,23 @@ export default function Expenses() {
           </div>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
-              <Pie data={mockExpensesByCategory} dataKey="current_amount" nameKey="category_name"
+              <Pie data={expenses} dataKey="current_amount" nameKey="category_name"
                 cx="50%" cy="50%" outerRadius={110} innerRadius={65}
                 stroke="rgba(0,0,0,0.3)" strokeWidth={2}>
-                {mockExpensesByCategory.map((_, i) => (
+                {expenses.map((_, i) => (
                   <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
                 ))}
               </Pie>
               <Tooltip
                 contentStyle={{ background: '#1a1f35', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', fontSize: '13px' }}
-                formatter={(v: number) => [`$${v.toLocaleString()}`, 'Monto']}
+                formatter={(v: any) => [`$${parseFloat(v).toLocaleString()}`, 'Monto']}
               />
             </PieChart>
           </ResponsiveContainer>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.625rem', justifyContent: 'center' }}>
-            {mockExpensesByCategory.map((cat, i) => (
+            {expenses.map((cat, i) => (
               <span key={cat.category_id} style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                <span style={{ width: 8, height: 8, borderRadius: '50%', background: PIE_COLORS[i] }} />
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: PIE_COLORS[i % PIE_COLORS.length] }} />
                 {cat.icon} {cat.category_name}
               </span>
             ))}
@@ -97,13 +118,13 @@ export default function Expenses() {
             <h3>Por categoría vs anterior</h3>
           </div>
           <div className="expense-cats">
-            {mockExpensesByCategory.map(cat => (
+            {expenses.map(cat => (
               <div key={cat.category_id} className={`expense-cat-row ${cat.has_alert ? 'expense-alert-row' : ''}`}>
                 <span className="expense-cat-icon">{cat.icon}</span>
                 <div className="expense-cat-info">
                   <div className="expense-cat-name">{cat.category_name}</div>
                   <div className="expense-cat-amounts">
-                    ${cat.current_amount.toLocaleString()} <span style={{ color: 'var(--text-muted)' }}>/ ant. ${cat.previous_amount.toLocaleString()}</span>
+                    ${parseFloat(cat.current_amount as any || 0).toLocaleString()} <span style={{ color: 'var(--text-muted)' }}>/ ant. ${parseFloat(cat.previous_amount as any || 0).toLocaleString()}</span>
                   </div>
                 </div>
                 <div className="expense-cat-bar">
@@ -112,9 +133,9 @@ export default function Expenses() {
                     background: cat.has_alert ? 'var(--color-yellow)' : 'var(--accent-primary)'
                   }} />
                 </div>
-                <span className="expense-cat-pct">{cat.pct_of_total}%</span>
+                <span className="expense-cat-pct">{parseFloat(cat.pct_of_total as any || 0).toFixed(1)}%</span>
                 <span className={`expense-cat-change ${cat.pct_change > 15 ? 'text-red' : cat.pct_change > 0 ? 'text-yellow' : 'text-green'}`}>
-                  {cat.pct_change > 0 ? '+' : ''}{cat.pct_change}%
+                  {cat.pct_change > 0 ? '+' : ''}{parseFloat(cat.pct_change as any || 0).toFixed(1)}%
                 </span>
               </div>
             ))}
