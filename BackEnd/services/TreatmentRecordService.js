@@ -38,7 +38,28 @@ class TreatmentRecordService {
             notes: data.notes || null
         };
 
-        return this.recordRepo.create(record);
+        const newRecord = await this.recordRepo.create(record);
+
+        // ─── Lógica de Inventario (Consumo Automático) ───
+        try {
+            const inventoryRepo = require('../repositories/InventoryRepository');
+            const supplies = await inventoryRepo.getSuppliesByTreatment(data.treatment_id);
+            
+            for (const supply of supplies) {
+                await inventoryRepo.addTransaction(clinicId, {
+                    item_id: supply.item_id,
+                    type: 'out',
+                    quantity: supply.quantity_used,
+                    transaction_date: record.performed_date,
+                    notes: `Consumo automático por tratamiento: ${treatment.name}`
+                });
+            }
+        } catch (error) {
+            console.error('Error en consumo de inventario:', error);
+            // No bloqueamos el registro del tratamiento si falla el inventario
+        }
+
+        return newRecord;
     }
 
     /**

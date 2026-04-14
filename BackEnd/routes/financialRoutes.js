@@ -9,4 +9,8 @@ router.get('/profitability', financialController.getProfitabilityReport.bind(fin
 // POST /insights 
 router.post('/insights', financialController.saveAiReport.bind(financialController));
 
+// GET /upcoming-reminders (Para n8n)
+router.get('/upcoming-reminders', financialController.getUpcomingReminders.bind(financialController));
+
 module.exports = router;
+

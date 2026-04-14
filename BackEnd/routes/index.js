@@ -10,6 +10,8 @@ const appointmentRoutes = require('./appointmentRoutes');
 const dashboardRoutes = require('./dashboardRoutes');
 const financialRoutes = require('./financialRoutes');
 const doctorRoutes = require('./doctorRoutes');
+const inventoryRoutes = require('./inventoryRoutes');
+
 
 const router = Router();
 
@@ -27,5 +29,7 @@ router.use('/expenses', expenseRoutes);
 router.use('/appointments', appointmentRoutes);
 router.use('/dashboard', dashboardRoutes);
 router.use('/doctors', doctorRoutes);
+router.use('/inventory', inventoryRoutes);
 
 module.exports = router;
+

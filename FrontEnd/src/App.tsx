@@ -7,7 +7,11 @@ import Treatments from './pages/Treatments';
 import Expenses from './pages/Expenses';
 import Appointments from './pages/Appointments';
 import Doctors from './pages/Doctors';
+import Patients from './pages/Patients';
+import Inventory from './pages/Inventory';
+
 import AIPanel from './pages/AIPanel';
+
 import Settings from './pages/Settings';
 import { Toaster } from 'sonner';
 import './index.css';
@@ -36,7 +40,11 @@ function AppRoutes() {
           <Route path="/expenses" element={<Expenses />} />
           <Route path="/appointments" element={<Appointments />} />
           <Route path="/doctors" element={<Doctors />} />
+          <Route path="/patients" element={<Patients />} />
+          <Route path="/inventory" element={<Inventory />} />
+
           <Route path="/ai-panel" element={<AIPanel />} />
+
           <Route path="/settings" element={<Settings />} />
         </Route>
       </Routes>

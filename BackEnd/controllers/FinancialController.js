@@ -42,6 +42,26 @@ class FinancialController {
             next(error);
         }
     }
+
+    async getUpcomingReminders(req, res, next) {
+        try {
+            const appointmentRepo = require('../repositories/AppointmentRepository.js');
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const dateStr = tomorrow.toISOString().split('T')[0];
+            
+            const reminders = await appointmentRepo.getRemindersForDate(dateStr);
+            
+            res.status(200).json({
+                success: true,
+                count: reminders.length,
+                data: reminders
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = new FinancialController();
+

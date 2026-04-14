@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { 
   ChevronLeft, ChevronRight, Clock, User, Plus, 
-  CheckCircle, XCircle, AlertCircle 
+  CheckCircle, XCircle, AlertCircle, MessageSquare
 } from 'lucide-react';
 import Skeleton from '../components/ui/Skeleton';
 import { toast } from 'sonner';
@@ -169,7 +169,18 @@ export default function Appointments() {
                             <span className={`badge badge-${statusConfig[appointment.status]?.color || 'blue'}`}>
                               {statusConfig[appointment.status]?.label || appointment.status}
                             </span>
+                            <button 
+                              className="btn-wa" 
+                              title="Recordatorio WhatsApp"
+                              onClick={() => {
+                                const msg = `Hola ${appointment.patient}, te recordamos tu cita de ${appointment.treatment} hoy a las ${appointment.time}. ¡Te esperamos!`;
+                                window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+                              }}
+                            >
+                              <MessageSquare size={12} />
+                            </button>
                             <span>${appointment.price}</span>
+
                           </div>
                         </div>
                       )}

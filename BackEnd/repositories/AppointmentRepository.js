@@ -49,6 +49,20 @@ class AppointmentRepository extends BaseRepository {
         if (reason) data.cancellation_reason = reason;
         return this.update(id, data, clinicId);
     }
+
+    /**
+     * Obtiene datos básicos para recordatorios de un día específico.
+     */
+    async getRemindersForDate(dateStr) {
+        const sql = `
+            SELECT a.id, a.start_time, p.name as patient_name, p.phone, t.name as treatment_name
+            FROM appointments a
+            JOIN patients p ON a.patient_id = p.id
+            JOIN treatments t ON a.treatment_id = t.id
+            WHERE DATE(a.start_time) = ? AND a.status = 'scheduled'`;
+        return this.query(sql, [dateStr]);
+    }
 }
+
 
 module.exports = AppointmentRepository;

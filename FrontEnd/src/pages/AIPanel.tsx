@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { BrainCircuit, MessageSquare, Send, AlertTriangle, Lightbulb, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
+import api from '../services/api';
 import AlertCard from '../components/ui/AlertCard';
+
 import { mockAlerts } from '../data/mockData';
 import './AIPanel.css';
 
@@ -44,9 +46,10 @@ export default function AIPanel() {
     const sd = hace7dias.toISOString().split('T')[0];
     const ed = hoy.toISOString().split('T')[0];
 
-    fetch(`http://localhost:3000/api/finance/profitability?startDate=${sd}&endDate=${ed}`)
-      .then(res => res.json())
-      .then(json => {
+    api.get(`/finance/profitability?startDate=${sd}&endDate=${ed}`)
+      .then(res => {
+        const json = res.data;
+
         if (json.success && json.data.criticalAlerts > 0) {
            const newAlerts = json.data.details
              .filter((d: any) => d.status === 'CRITICAL')
@@ -68,9 +71,10 @@ export default function AIPanel() {
 
   const triggerAnalysis = async () => {
     setLoading(true);
-    const triggerPromise = fetch('https://onlyautotask-n8n.tuoaro.easypanel.host/webhook/trigger-cfo-analysis', { 
+    const triggerPromise = fetch(import.meta.env.VITE_N8N_WEBHOOK_URL, { 
       method: 'POST' 
     });
+
 
     toast.promise(triggerPromise, {
       loading: 'El CFO Digital está analizando tu base de datos...',

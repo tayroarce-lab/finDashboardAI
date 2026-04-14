@@ -1,0 +1,104 @@
+{
+  "name": "DentalFlow_AI_V2",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 22 * * 5"
+            }
+          ]
+        }
+      },
+      "id": "t1",
+      "name": "Cron Semanal (Viernes 10PM)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "url": "http://TU-TUNEL-TUNEL.localtunnel.me/api/finance/profitability?startDate={{$today.minus(7, 'days').toFormat('yyyy-MM-dd')}}&endDate={{$today.toFormat('yyyy-MM-dd')}}"
+      },
+      "id": "f1",
+      "name": "Bajar Datos del Backend",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [200, 0]
+    },
+    {
+      "parameters": {
+        "resource": "chat",
+        "operation": "complete",
+        "prompt": {
+          "messages": [
+            {
+              "role": "system",
+              "content": "Eres un CFO experto en clínicas dentales. Analiza los datos de rentabilidad que se te entregan. Identifica tratamientos con margen menor al 40% y sugiere acciones inmediatas."
+            },
+            {
+              "role": "user",
+              "content": "={{ JSON.stringify($json) }}"
+            }
+          ]
+        }
+      },
+      "id": "ai1",
+      "name": "IA Analysis (OpenAI)",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [400, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://TU-TUNEL-TUNEL.localtunnel.me/api/finance/insights",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={ \"summary\": \"{{ $json.message.content }}\", \"recommendedAction\": \"Revisar costos de insumos o subir precios de tratamientos estrella.\", \"severity\": \"CRITICAL\" }"
+      },
+      "id": "s1",
+      "name": "Guardar Insight en DB",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [600, 0]
+    }
+  ],
+  "connections": {
+    "Cron Semanal (Viernes 10PM)": {
+      "main": [
+        [
+          {
+            "node": "Bajar Datos del Backend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bajar Datos del Backend": {
+      "main": [
+        [
+          {
+            "node": "IA Analysis (OpenAI)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IA Analysis (OpenAI)": {
+      "main": [
+        [
+          {
+            "node": "Guardar Insight en DB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

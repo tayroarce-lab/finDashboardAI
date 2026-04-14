@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
-import { BrainCircuit, Bell, TrendingUp, ArrowRight, Trophy } from 'lucide-react';
+import { BrainCircuit, Bell, TrendingUp, ArrowRight, Trophy, Download } from 'lucide-react';
+import { exportDashboardPDF } from '../utils/pdfExport';
+
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis,
   CartesianGrid, Tooltip, BarChart, Bar, Cell
@@ -8,8 +10,10 @@ import KPICard from '../components/ui/KPICard';
 import AlertCard from '../components/ui/AlertCard';
 import { mockKPIs, mockAlerts, mockTopTreatments, mockRevenueChart } from '../data/mockData';
 import Skeleton from '../components/ui/Skeleton';
+import api from '../services/api';
 import { toast } from 'sonner';
 import './Dashboard.css';
+
 
 const periods = [
   { value: 'week', label: 'Semana' },
@@ -36,19 +40,19 @@ export default function Dashboard() {
     if (!token) return;
 
     setLoading(true);
-    const headers = { 'Authorization': `Bearer ${token}` };
 
     Promise.all([
-      fetch(`http://localhost:3000/api/dashboard/kpis?period=${period}`, { headers }).then(res => res.json()),
-      fetch(`http://localhost:3000/api/dashboard/revenue-chart?period=${period}`, { headers }).then(res => res.json()),
-      fetch(`http://localhost:3000/api/dashboard/top-treatments?period=${period}`, { headers }).then(res => res.json()),
-      fetch(`http://localhost:3000/api/dashboard/alerts`, { headers }).then(res => res.json())
+      api.get(`/dashboard/kpis?period=${period}`),
+      api.get(`/dashboard/revenue-chart?period=${period}`),
+      api.get(`/dashboard/top-treatments?period=${period}`),
+      api.get(`/dashboard/alerts`)
     ]).then(([kpiRes, revRes, topRes, alertsRes]) => {
-      if (kpiRes.success) setKpis(kpiRes.data.kpis);
-      if (revRes.success) setRevenueChart(revRes.data);
-      if (topRes.success) setTopTreatments(topRes.data);
-      if (alertsRes.success) setAlerts(alertsRes.data);
+      if (kpiRes.data.success) setKpis(kpiRes.data.data.kpis);
+      if (revRes.data.success) setRevenueChart(revRes.data.data);
+      if (topRes.data.success) setTopTreatments(topRes.data.data);
+      if (alertsRes.data.success) setAlerts(alertsRes.data.data);
     }).catch(err => {
+
       console.error("Error fetching dashboard data:", err);
       toast.error('Error al cargar datos del dashboard');
     })
@@ -76,8 +80,16 @@ export default function Dashboard() {
               </button>
             ))}
           </div>
+          <button 
+            className="btn btn-secondary" 
+            onClick={() => exportDashboardPDF(kpis, revenueChart, topTreatments)}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+          >
+            <Download size={16} /> Exportar PDF
+          </button>
         </div>
       </div>
+
 
       {/* KPI Cards */}
       <div className="grid-kpis">
