@@ -20,7 +20,7 @@
     },
     {
       "parameters": {
-        "url": "http://TU-TUNEL-TUNEL.localtunnel.me/api/finance/profitability?startDate={{$today.minus(7, 'days').toFormat('yyyy-MM-dd')}}&endDate={{$today.toFormat('yyyy-MM-dd')}}"
+        "url": "https://common-spies-sleep.loca.lt/api/finance/profitability?startDate={{$today.minus(7, 'days').toFormat('yyyy-MM-dd')}}&endDate={{$today.toFormat('yyyy-MM-dd')}}"
       },
       "id": "f1",
       "name": "Bajar Datos del Backend",
@@ -54,7 +54,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "http://TU-TUNEL-TUNEL.localtunnel.me/api/finance/insights",
+        "url": "https://common-spies-sleep.loca.lt/api/finance/insights",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={ \"summary\": \"{{ $json.message.content }}\", \"recommendedAction\": \"Revisar costos de insumos o subir precios de tratamientos estrella.\", \"severity\": \"CRITICAL\" }"

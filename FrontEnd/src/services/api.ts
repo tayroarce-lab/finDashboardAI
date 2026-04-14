@@ -8,6 +8,7 @@ const api = axios.create({
   timeout: 15000,
 });
 
+
 // Interceptor: Agrega JWT a cada request
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('df_token');
