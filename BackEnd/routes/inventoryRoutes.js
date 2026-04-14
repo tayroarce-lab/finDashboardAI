@@ -13,6 +13,6 @@ router.get('/:id/history', inventoryController.getHistory.bind(inventoryControll
 router.get('/', inventoryController.getAll.bind(inventoryController));
 router.post('/', inventoryController.create.bind(inventoryController));
 router.put('/:id', inventoryController.update.bind(inventoryController));
-router.delete('/:id', inventoryController.delete.bind(inventoryController));
+router.delete('/:id', inventoryController.remove.bind(inventoryController));
 
 module.exports = router;

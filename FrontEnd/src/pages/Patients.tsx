@@ -21,13 +21,14 @@ export default function Patients() {
     fetchPatients();
   }, []);
 
-  const fetchPatients() {
+  const fetchPatients = () => {
     try {
       setLoading(true);
       api.get('/patients').then(res => {
         if (res.data.success) setPatients(res.data.data);
       });
     } catch (error) {
+
       console.error(error);
       toast.error('Error al cargar pacientes');
     } finally {
