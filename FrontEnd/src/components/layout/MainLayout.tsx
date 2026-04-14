@@ -6,19 +6,19 @@ import './MainLayout.css';
 
 export default function MainLayout() {
   const [isPageLoading, setIsPageLoading] = useState(true);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
-    // Show loader on route change for a brief moment to feel "premium"
     setIsPageLoading(true);
     const timer = setTimeout(() => setIsPageLoading(false), 800);
     return () => clearTimeout(timer);
   }, [location.pathname]);
 
   return (
-    <div className="layout">
+    <div className={`layout ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
       {isPageLoading && <PageLoader />}
-      <Sidebar />
+      <Sidebar isCollapsed={isSidebarCollapsed} onToggle={() => setIsSidebarCollapsed(!isSidebarCollapsed)} />
       <main className="layout-main">
         <div className="content-container">
           <Outlet />

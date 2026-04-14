@@ -11,6 +11,12 @@
   height: 100vh;
   overflow-y: auto;
   scroll-behavior: smooth;
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1), max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-collapsed .layout-main {
+  margin-left: 72px;
+  max-width: calc(100vw - 72px);
 }
 
 .content-container {

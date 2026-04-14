@@ -3,7 +3,7 @@ import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid,
   Tooltip, Cell
 } from 'recharts';
-import { Plus, Filter, Star, Gem, Briefcase, Skull, CircleDollarSign, TrendingUp, DollarSign, FileDown } from 'lucide-react';
+import { Plus, Filter, Star, Gem, Briefcase, Skull, CircleDollarSign, TrendingUp, DollarSign, FileDown, BrainCircuit, RefreshCw, AlertTriangle } from 'lucide-react';
 import type { TreatmentProfitability } from '../types';
 import Skeleton from '../components/ui/Skeleton';
 import { downloadCSV } from '../utils/export';
@@ -30,17 +30,28 @@ const quadrantColors: Record<string, string> = {
 };
 
 export default function Treatments() {
-  const [tab, setTab] = useState<'catalog' | 'profitability'>('profitability');
+  const [tab, setTab] = useState<'catalog' | 'profitability' | 'simulator'>('profitability');
   const [profitabilityData, setProfitabilityData] = useState<TreatmentProfitability[]>(mockProfitability);
   const [loading, setLoading] = useState(true);
+  
+  // Simulator state
+  const [simTarget, setSimTarget] = useState<number>(0);
+  const [simPrice, setSimPrice] = useState<number>(0);
+  const [simCost, setSimCost] = useState<number>(0);
 
   useEffect(() => {
     const fetchTreatments = async () => {
       try {
         setLoading(true);
-        const res = await api.get('/treatments/analysis/profitability');
+        const res = await api.get('/finance/profitability');
         if (res.data.success && res.data.data) {
           setProfitabilityData(res.data.data);
+          if (res.data.data.length > 0) {
+            const first = res.data.data[0];
+            setSimTarget(0);
+            setSimPrice(first.catalog_price || 0);
+            setSimCost(first.estimated_cost || 0);
+          }
         }
       } catch (err) {
         console.error("Error fetching treatments data:", err);
@@ -53,6 +64,11 @@ export default function Treatments() {
   }, []);
 
   const activeData = profitabilityData.filter(t => t.times_performed > 0);
+
+  const selectedForSim = profitabilityData[simTarget];
+  const currentSimMargin = simPrice > 0 ? ((simPrice - simCost) / simPrice) * 100 : 0;
+  const originalMargin = selectedForSim ? ((selectedForSim.catalog_price - selectedForSim.estimated_cost) / selectedForSim.catalog_price) * 100 : 0;
+  const marginDiff = currentSimMargin - originalMargin;
 
   return (
     <div className="treatments-page">
@@ -73,7 +89,6 @@ export default function Treatments() {
         </div>
       </div>
 
-      {/* Tabs */}
       <div className="tabs">
         <button className={`tab ${tab === 'profitability' ? 'tab-active' : ''}`}
           onClick={() => setTab('profitability')}>
@@ -83,17 +98,20 @@ export default function Treatments() {
           onClick={() => setTab('catalog')}>
           <DollarSign size={16} /> Catálogo
         </button>
+        <button className={`tab ${tab === 'simulator' ? 'tab-active' : ''}`}
+          onClick={() => setTab('simulator')}>
+          <BrainCircuit size={16} /> Simulador IA
+        </button>
       </div>
 
-      {tab === 'profitability' ? (
+      {tab === 'profitability' && (
         <>
-          {/* Quadrant Summary */}
           <div className="grid-kpis">
             {loading 
               ? Array(4).fill(0).map((_, i) => <Skeleton key={i} height="140px" variant="rect" />)
               : (['star', 'gem', 'cow', 'trap'] as const).map(type => {
                   const items = activeData.filter(t => t.quadrant.type === type);
-                  const labels: Record<string, { icon: React.FC<any>; name: string; desc: string }> = {
+                  const labels: Record<string, { icon: any; name: string; desc: string }> = {
                     star: { icon: Star, name: 'Estrellas', desc: 'Alto margen + Alto volumen' },
                     gem: { icon: Gem, name: 'Joyas', desc: 'Alto margen + Bajo volumen' },
                     cow: { icon: Briefcase, name: 'Vacas', desc: 'Bajo margen + Alto volumen' },
@@ -115,7 +133,6 @@ export default function Treatments() {
             }
           </div>
 
-          {/* Margin Chart */}
           <div className="card animate-fade-in">
             <div className="card-header">
               <h3>Margen por tratamiento</h3>
@@ -139,7 +156,6 @@ export default function Treatments() {
             </ResponsiveContainer>
           </div>
 
-          {/* Table */}
           <div className="card animate-fade-in">
             <div className="card-header">
               <h3>Detalle de rentabilidad</h3>
@@ -154,7 +170,6 @@ export default function Treatments() {
                     <th>Costo Prom.</th>
                     <th>Margen</th>
                     <th>Contribución Total</th>
-                    <th>Cuadrante</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -166,7 +181,6 @@ export default function Treatments() {
                       <td>${(t.avg_cost || 0).toFixed(2)}</td>
                       <td><span className={`badge badge-${(t.avg_margin_pct || 0) >= 50 ? 'green' : (t.avg_margin_pct || 0) >= 30 ? 'yellow' : 'red'}`}>{(t.avg_margin_pct || 0).toFixed(1)}%</span></td>
                       <td className="text-accent">${(t.total_profit_contribution || 0).toFixed(2)}</td>
-                      <td>{t.quadrant?.label || '-'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -174,7 +188,9 @@ export default function Treatments() {
             </div>
           </div>
         </>
-      ) : (
+      )}
+
+      {tab === 'catalog' && (
         <div className="card animate-fade-in">
           <div className="card-header"><h3>Catálogo de Tratamientos</h3></div>
           <div className="table-wrap">
@@ -195,6 +211,112 @@ export default function Treatments() {
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {tab === 'simulator' && selectedForSim && (
+        <div className="simulator-container animate-fade-in">
+          <div className="card simulator-controls">
+            <div className="card-header">
+              <h3><BrainCircuit size={18} color="#6366f1" /> Simulador de Impacto en Margen</h3>
+              <p className="text-muted">Ajusta variables para ver cómo afecta la rentabilidad</p>
+            </div>
+            
+            <div className="sim-form">
+              <div className="form-group">
+                <label>Seleccionar Tratamiento</label>
+                <select 
+                  className="form-control" 
+                  value={simTarget} 
+                  onChange={(e) => {
+                    const idx = parseInt(e.target.value);
+                    setSimTarget(idx);
+                    setSimPrice(profitabilityData[idx].catalog_price);
+                    setSimCost(profitabilityData[idx].estimated_cost);
+                  }}
+                >
+                  {profitabilityData.map((t, i) => <option key={t.id} value={i}>{t.name}</option>)}
+                </select>
+              </div>
+
+              <div className="sim-sliders">
+                <div className="form-group">
+                  <div className="label-row">
+                    <label>Nuevo Precio</label>
+                    <span className="val">${simPrice}</span>
+                  </div>
+                  <input 
+                    type="range" 
+                    min={simCost} 
+                    max={simPrice * 2} 
+                    step="5" 
+                    value={simPrice} 
+                    onChange={(e) => setSimPrice(parseInt(e.target.value))} 
+                  />
+                </div>
+
+                <div className="form-group">
+                  <div className="label-row">
+                    <label>Nuevo Costo de Materiales</label>
+                    <span className="val">${simCost}</span>
+                  </div>
+                  <input 
+                    type="range" 
+                    min="1" 
+                    max={simPrice} 
+                    step="1" 
+                    value={simCost} 
+                    onChange={(e) => setSimCost(parseInt(e.target.value))} 
+                  />
+                </div>
+              </div>
+
+              <div className="sim-actions">
+                <button className="btn btn-secondary" onClick={() => {
+                  setSimPrice(selectedForSim.catalog_price);
+                  setSimCost(selectedForSim.estimated_cost);
+                }}>
+                  <RefreshCw size={14} /> Resetear
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="simulator-results">
+            <div className="card sim-result-card glass-glow">
+              <span className="sim-label">Margen proyectado</span>
+              <h2 className={`sim-value ${currentSimMargin > 50 ? 'text-green' : currentSimMargin > 30 ? 'text-yellow' : 'text-red'}`}>
+                {currentSimMargin.toFixed(1)}%
+              </h2>
+              <div className={`sim-diff ${marginDiff >= 0 ? 'diff-up' : 'diff-down'}`}>
+                {marginDiff >= 0 ? '+' : ''}{marginDiff.toFixed(1)}% vs anterior
+              </div>
+            </div>
+
+            <div className="card recommendation-card">
+              <div className="card-header">
+                <h4><TrendingUp size={16} color="#6366f1"/> Estrategia recomendada</h4>
+              </div>
+              <div className="rec-content">
+                {currentSimMargin < 40 ? (
+                  <div className="rec-item rec-danger">
+                    <AlertTriangle size={18} />
+                    <p>Margen crítico. Considera aumentar el precio o buscar proveedores de materiales más económicos para este servicio.</p>
+                  </div>
+                ) : marginDiff > 5 ? (
+                  <div className="rec-item rec-success">
+                    <TrendingUp size={18} />
+                    <p>Optimización positiva. Este ajuste aumentaría la rentabilidad neta mensual en aprox. ${(marginDiff/100 * simPrice * (selectedForSim.times_performed || 10)).toFixed(0)}.</p>
+                  </div>
+                ) : (
+                  <div className="rec-item rec-info">
+                    <Briefcase size={18} />
+                    <p>Mantén este rango de precios. El margen es saludable y competitivo para la categoría de {selectedForSim.category}.</p>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       )}
