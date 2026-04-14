@@ -1,170 +1,152 @@
 .inventory-page {
-  animation: fadeIn 0.5s ease-out;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }
 
+/* Inventory Stats */
 .inventory-stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1.5rem;
-  margin-bottom: 2rem;
 }
 
 .stat-card {
   display: flex;
   align-items: center;
   gap: 1.25rem;
-  padding: 1.25rem 1.5rem;
-  background: var(--glass-bg);
-  backdrop-filter: blur(10px);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-lg);
+  padding: 1.5rem;
 }
 
 .stat-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-md);
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.stat-icon.purple { background: var(--accent-glow); color: var(--accent-primary); }
-.stat-icon.red { background: var(--color-red-bg); color: var(--color-red); }
-.stat-icon.green { background: var(--color-green-bg); color: var(--color-green); }
-.stat-icon.blue { background: var(--color-blue-bg); color: var(--color-blue); }
+.stat-icon.purple { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
+.stat-icon.red { background: rgba(244, 63, 94, 0.1); color: #f43f5e; }
+.stat-icon.green { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+.stat-icon.blue { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+
+.stat-content {
+  display: flex;
+  flex-direction: column;
+}
 
 .stat-label {
-  display: block;
-  font-size: 0.875rem;
-  color: var(--text-muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .stat-value {
-  display: block;
   font-size: 1.5rem;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--text-primary);
+  font-family: var(--font-jakarta);
 }
 
-.inventory-main {
-  padding: 1.5rem;
-}
-
+/* Controls */
 .inventory-controls {
   display: flex;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 .search-wrap {
-  flex: 1;
-  min-width: 300px;
   position: relative;
+  flex: 1;
 }
 
 .search-icon {
   position: absolute;
-  left: 12px;
+  left: 1rem;
   top: 50%;
   transform: translateY(-50%);
   color: var(--text-muted);
 }
 
 .search-input {
-  padding-left: 40px;
-  width: 100%;
+  padding-left: 2.75rem !important;
 }
 
 .filter-select {
-  width: 200px;
+  width: 240px;
 }
 
-.inventory-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.inventory-table th {
-  text-align: left;
-  padding: 1rem;
-  border-bottom: 1px solid var(--border-color);
-  color: var(--text-muted);
-  font-weight: 600;
-  font-size: 0.875rem;
-}
-
-.inventory-table td {
-  padding: 1rem;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.row-alert {
-  background: rgba(244, 63, 94, 0.05);
-}
-
+/* Item Cell */
 .item-info {
   display: flex;
   flex-direction: column;
+  gap: 0.125rem;
 }
 
-.badge-cat {
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 600;
+.item-info strong {
+  font-size: 0.9375rem;
 }
 
-.badge-supplies { background: rgba(99, 102, 241, 0.15); color: #818cf8; }
-.badge-medicine { background: rgba(16, 185, 129, 0.15); color: #34d399; }
-.badge-equipment { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
-.badge-office { background: rgba(107, 114, 128, 0.15); color: #9ca3af; }
+.text-xs { font-size: 0.75rem; }
 
-.status-indicator {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.75rem;
-}
-
-.status-indicator.low { color: #f43f5e; background: rgba(244, 63, 94, 0.1); }
-.status-indicator.ok { color: #10b981; background: rgba(16, 185, 129, 0.1); }
-
+/* Stock Cell */
 .stock-info {
   display: flex;
   flex-direction: column;
+}
+
+.stock-number {
+  font-size: 1rem;
+}
+
+/* Status Indicators */
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.75rem;
+  border-radius: 99px;
+}
+
+.status-indicator.low {
+  background: rgba(244, 63, 94, 0.1);
+  color: #f43f5e;
+}
+
+.status-indicator.ok {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
 }
 
 .btn-icon {
   width: 32px;
   height: 32px;
   border-radius: 8px;
-  border: 1px solid var(--border-color);
-  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--glass-border);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .btn-icon:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: var(--text-muted);
-}
-
-.grid-list-loading {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  padding: 1rem 0;
+  background: rgba(255,255,255,0.08);
+  transform: translateY(-2px);
 }
 
 @media (max-width: 768px) {
-  .inventory-stats {
-    grid-template-columns: 1fr 1fr;
+  .inventory-controls {
+    flex-direction: column;
+  }
+  .filter-select {
+    width: 100%;
   }
 }

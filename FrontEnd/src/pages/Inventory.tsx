@@ -64,30 +64,29 @@ export default function Inventory() {
     <div className="inventory-page animate-fade-in">
       <header className="page-header">
         <div>
-          <h1 style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <Package size={32} color="#6366f1" /> Gestión de Inventario
+          <h1 className="flex items-center gap-3">
+            <Package size={32} className="text-accent" /> Control de Inventario
           </h1>
-          <p className="text-muted">Control de insumos, materiales y equipos dentales</p>
+          <p className="text-muted">Gestión de insumos y materiales críticos para la operación</p>
         </div>
         <div className="page-actions">
           <button className="btn btn-secondary">
             <History size={16} /> Movimientos
           </button>
           <button className="btn btn-primary">
-            <Plus size={16} /> Nuevo Ítem
+            <Plus size={16} /> Agregar Ítem
           </button>
         </div>
       </header>
-
-      {/* Stats row */}
+ 
       <div className="inventory-stats">
         {[
-          { icon: Package, label: 'Total Ítems', value: stats.totalItems, color: 'purple' },
+          { icon: Package, label: 'Ítems Totales', value: stats.totalItems, color: 'purple' },
           { icon: AlertCircle, label: 'Stock Bajo', value: stats.lowStock, color: 'red' },
-          { icon: ShoppingCart, label: 'Valorizado', value: `$${stats.totalValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, color: 'green' },
+          { icon: ShoppingCart, label: 'Valor de Bodega', value: `$${stats.totalValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, color: 'green' },
           { icon: TrendingDown, label: 'Categorías', value: stats.categories, color: 'blue' }
         ].map((s, i) => (
-          <div key={i} className={`card stat-card stagger-${i+1}`}>
+          <div key={i} className={`card stat-card animate-fade-in`} style={{ animationDelay: `${i * 0.1}s` }}>
             <div className={`stat-icon ${s.color}`}><s.icon size={20} /></div>
             <div className="stat-content">
               <span className="stat-label">{s.label}</span>
@@ -96,14 +95,14 @@ export default function Inventory() {
           </div>
         ))}
       </div>
-
-      <div className="card inventory-main animate-fade-in stagger-3">
+ 
+      <div className="card inventory-main animate-fade-in" style={{ animationDelay: '0.4s' }}>
         <div className="inventory-controls">
           <div className="search-wrap">
             <Search size={18} className="search-icon" />
             <input 
               type="text" 
-              placeholder="Buscar por nombre o SKU..." 
+              placeholder="Buscar por nombre, SKU o categoría..." 
               className="input search-input"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -114,41 +113,39 @@ export default function Inventory() {
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
           >
-            <option value="all">Todas las Categorías</option>
-            <option value="low">⚠️ Stock Bajo</option>
-            <option value="supplies">Insumos</option>
-            <option value="medicine">Medicamentos</option>
-            <option value="equipment">Equipos</option>
-            <option value="office">Oficina</option>
+            <option value="all">Filtro: Todos los Materiales</option>
+            <option value="low">⚠️ Nivel Crítico (Stock Bajo)</option>
+            <option value="supplies">Insumos Clínicos</option>
+            <option value="medicine">Medicamentos & Anestesia</option>
+            <option value="equipment">Instrumental & Equipo</option>
           </select>
         </div>
-
+ 
         {loading ? (
-          <div className="grid-list-loading">
-            {Array(5).fill(0).map((_, i) => (
-              <Skeleton key={i} height="72px" />
+          <div className="p-4">
+            {Array(6).fill(0).map((_, i) => (
+              <Skeleton key={i} height="72px" className="mb-3" />
             ))}
           </div>
         ) : filteredItems.length === 0 ? (
           <EmptyState 
             icon={ArchiveX}
-            title="Inventario vacío"
-            description="No encontramos productos que coincidan con tu búsqueda o filtros."
-            actionLabel="Limpiar filtros"
+            title="Resultados no encontrados"
+            description="No hay materiales que coincidan con los criterios de búsqueda actuales."
+            actionLabel="Ver todo el inventario"
             onAction={() => { setSearchTerm(''); setFilter('all'); }}
           />
         ) : (
           <div className="table-wrap">
-            <table className="inventory-table">
+            <table className="data-table">
               <thead>
                 <tr>
-                  <th>Ítem / SKU</th>
+                  <th>Material / Referencia</th>
                   <th>Categoría</th>
-                  <th>Stock Actual</th>
-                  <th>Estado</th>
-                  <th>Costo Prom.</th>
-                  <th>Valor Total</th>
-                  <th>Acciones</th>
+                  <th>Disponibilidad</th>
+                  <th>Prioridad</th>
+                  <th>Valorizado</th>
+                  <th>Operaciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -157,42 +154,44 @@ export default function Inventory() {
                     <td>
                       <div className="item-info">
                         <strong>{item.name}</strong>
-                        <span className="text-muted text-xs">{item.sku || 'SIN-SKU'}</span>
+                        <span className="text-muted text-xs">{item.sku || 'N/A'}</span>
                       </div>
                     </td>
                     <td>
-                      <span className={`badge badge-cat badge-${item.category}`}>
-                        {item.category.charAt(0).toUpperCase() + item.category.slice(1)}
+                      <span className={`badge badge-${item.category === 'medicine' ? 'red' : item.category === 'supplies' ? 'blue' : 'purple'}`}>
+                        {item.category === 'supplies' ? 'Insumo' : item.category === 'medicine' ? 'Fármaco' : 'Equipo'}
                       </span>
                     </td>
                     <td>
                       <div className="stock-info">
-                        <span className={`stock-number ${item.is_low_stock ? 'text-red font-bold' : ''}`}>
+                        <span className={`stock-number ${item.is_low_stock ? 'text-red font-bold' : 'text-primary'}`}>
                           {item.stock_current} {item.unit}
                         </span>
-                        <span className="text-xs text-muted">Mín: {item.stock_min}</span>
+                        <span className="text-xs text-muted">Mínimo: {item.stock_min}</span>
                       </div>
                     </td>
                     <td>
                       {item.is_low_stock ? (
                         <span className="status-indicator low">
-                          <AlertCircle size={12} /> Reordenar
+                          <AlertCircle size={12} /> CRÍTICO
                         </span>
                       ) : (
-                        <span className="status-indicator ok">En Stock</span>
+                        <span className="status-indicator ok">Estable</span>
                       )}
                     </td>
-                    <td>${item.average_cost.toFixed(2)}</td>
                     <td>
-                      <strong>${(item.stock_current * item.average_cost).toFixed(2)}</strong>
+                      <div className="flex flex-col">
+                        <strong>${(item.stock_current * item.average_cost).toFixed(2)}</strong>
+                        <span className="text-xs text-muted">u: ${item.average_cost.toFixed(2)}</span>
+                      </div>
                     </td>
                     <td>
                       <div className="flex gap-2">
-                        <button className="btn-icon" title="Entrada de Stock">
-                          <ArrowUpRight size={16} color="#10b981" />
+                        <button className="btn-icon" title="Entrada Stock">
+                          <Plus size={14} className="text-green" />
                         </button>
-                        <button className="btn-icon" title="Salida / Consumo">
-                          <ArrowDownRight size={16} color="#f43f5e" />
+                        <button className="btn-icon" title="Ajuste / Salida">
+                          <TrendingDown size={14} className="text-red" />
                         </button>
                       </div>
                     </td>

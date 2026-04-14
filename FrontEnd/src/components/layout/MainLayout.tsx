@@ -2,13 +2,15 @@ import { useState, useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import PageLoader from '../ui/PageLoader';
-import { Bell, Search, User, ChevronDown } from 'lucide-react';
+import GlobalError from '../ui/GlobalError';
+import { Bell, Search, User, ChevronDown, CheckCircle2 } from 'lucide-react';
 import './MainLayout.css';
 
 export default function MainLayout() {
   const [isPageLoading, setIsPageLoading] = useState(true);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [globalError, setGlobalError] = useState<string | null>(null);
   const location = useLocation();
 
   useEffect(() => {
@@ -17,9 +19,19 @@ export default function MainLayout() {
     return () => clearTimeout(timer);
   }, [location.pathname]);
 
+  // Simulate global error handling
+  useEffect(() => {
+    const handleError = (e: any) => {
+      if (e.detail?.message) setGlobalError(e.detail.message);
+    };
+    window.addEventListener('app-error', handleError);
+    return () => window.removeEventListener('app-error', handleError);
+  }, []);
+
   return (
     <div className={`layout ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
       {isPageLoading && <PageLoader />}
+      {globalError && <GlobalError onRetry={() => setGlobalError(null)} message={globalError} />}
       
       <Sidebar 
         isCollapsed={isSidebarCollapsed} 
@@ -30,10 +42,16 @@ export default function MainLayout() {
         <header className="topbar">
           <div className="search-bar">
             <Search size={18} className="text-muted" />
-            <input type="text" placeholder="Buscar pacientes, tratamientos..." />
+            <input type="text" placeholder="IA Search: Pacientes, Finanzas, n8n..." />
           </div>
 
           <div className="topbar-actions">
+            <div className="status-badge-wrap">
+               <span className="badge badge-green">
+                  <CheckCircle2 size={12} /> Live
+               </span>
+            </div>
+
             <div className="notification-center">
               <button 
                 className={`icon-btn ${showNotifications ? 'active' : ''}`}
@@ -45,14 +63,14 @@ export default function MainLayout() {
               
               {showNotifications && (
                 <div className="notif-dropdown animate-fade-in glass-card">
-                  <div className="notif-header">Notificaciones</div>
+                  <div className="notif-header">Centro de Acción</div>
                   <div className="notif-item">
                     <p>IA Analysis Complete</p>
-                    <small>Nuevos insights de rentabilidad listos</small>
+                    <small>Resumen de rentabilidad de Marza disponible</small>
                   </div>
                   <div className="notif-item">
-                    <p>Inventario Bajo</p>
-                    <small>Resina 3M está pronto a agotarse</small>
+                    <p>Stock Crítico</p>
+                    <small>Resina Flow 3M por debajo del mínimo</small>
                   </div>
                 </div>
               )}
@@ -61,17 +79,17 @@ export default function MainLayout() {
             <div className="divider-v"></div>
 
             <div className="user-dropdown">
-              <div className="user-avatar">AD</div>
+              <div className="user-avatar text-accent">AD</div>
               <div className="user-meta">
-                <p>Admin Dental</p>
-                <small>Plan Pro</small>
+                <p>Admin Dental Flow</p>
+                <small>Elite Plan Member</small>
               </div>
               <ChevronDown size={14} className="text-muted" />
             </div>
           </div>
         </header>
 
-        <div className="content-container">
+        <div className="content-container animate-fade-in">
           <Outlet />
         </div>
       </main>

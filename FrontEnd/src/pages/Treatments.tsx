@@ -219,15 +219,15 @@ export default function Treatments() {
         <div className="simulator-container animate-fade-in">
           <div className="card simulator-controls">
             <div className="card-header">
-              <h3><BrainCircuit size={18} color="#6366f1" /> Simulador de Impacto en Margen</h3>
-              <p className="text-muted">Ajusta variables para ver cómo afecta la rentabilidad</p>
+              <h3><BrainCircuit size={18} color="#6366f1" /> Simulador de Impacto Inteligente</h3>
+              <p className="text-muted">Proyecta márgenes basados en ajustes tácticos</p>
             </div>
             
             <div className="sim-form">
               <div className="form-group">
-                <label>Seleccionar Tratamiento</label>
+                <label className="label">Tratamiento de Referencia</label>
                 <select 
-                  className="form-control" 
+                  className="input select" 
                   value={simTarget} 
                   onChange={(e) => {
                     const idx = parseInt(e.target.value);
@@ -239,12 +239,12 @@ export default function Treatments() {
                   {profitabilityData.map((t, i) => <option key={t.id} value={i}>{t.name}</option>)}
                 </select>
               </div>
-
+ 
               <div className="sim-sliders">
                 <div className="form-group">
-                  <div className="label-row">
-                    <label>Nuevo Precio</label>
-                    <span className="val">${simPrice}</span>
+                  <div className="sim-value-track">
+                    <span className="sim-label-text">Nuevo Punto de Precio</span>
+                    <span className="sim-amount-text">${simPrice}</span>
                   </div>
                   <input 
                     type="range" 
@@ -255,11 +255,11 @@ export default function Treatments() {
                     onChange={(e) => setSimPrice(parseInt(e.target.value))} 
                   />
                 </div>
-
+ 
                 <div className="form-group">
-                  <div className="label-row">
-                    <label>Nuevo Costo de Materiales</label>
-                    <span className="val">${simCost}</span>
+                  <div className="sim-value-track">
+                    <span className="sim-label-text">Escalamiento de Costos</span>
+                    <span className="sim-amount-text">${simCost}</span>
                   </div>
                   <input 
                     type="range" 
@@ -271,48 +271,47 @@ export default function Treatments() {
                   />
                 </div>
               </div>
-
-              <div className="sim-actions">
-                <button className="btn btn-secondary" onClick={() => {
-                  setSimPrice(selectedForSim.catalog_price);
-                  setSimCost(selectedForSim.estimated_cost);
-                }}>
-                  <RefreshCw size={14} /> Resetear
-                </button>
-              </div>
+ 
+              <button className="btn btn-secondary w-full" onClick={() => {
+                setSimPrice(selectedForSim.catalog_price);
+                setSimCost(selectedForSim.estimated_cost);
+              }}>
+                <RefreshCw size={14} /> Restaurar Valores Base
+              </button>
             </div>
           </div>
-
+ 
           <div className="simulator-results">
             <div className="card sim-result-card glass-glow">
-              <span className="sim-label">Margen proyectado</span>
-              <h2 className={`sim-value ${currentSimMargin > 50 ? 'text-green' : currentSimMargin > 30 ? 'text-yellow' : 'text-red'}`}>
+              <span className="sim-label-main">Margen Bruto Proyectado</span>
+              <h2 className={`sim-value-main ${currentSimMargin > 50 ? 'text-green' : currentSimMargin > 30 ? 'text-yellow' : 'text-red'}`}>
                 {currentSimMargin.toFixed(1)}%
               </h2>
-              <div className={`sim-diff ${marginDiff >= 0 ? 'diff-up' : 'diff-down'}`}>
-                {marginDiff >= 0 ? '+' : ''}{marginDiff.toFixed(1)}% vs anterior
+              <div className={`sim-diff-pill ${marginDiff >= 0 ? 'pill-up' : 'pill-down'}`}>
+                {marginDiff >= 0 ? <TrendingUp size={14}/> : <AlertTriangle size={14}/>}
+                {marginDiff >= 0 ? '+' : ''}{marginDiff.toFixed(1)}% de Diferencial
               </div>
             </div>
-
+ 
             <div className="card recommendation-card">
               <div className="card-header">
-                <h4><TrendingUp size={16} color="#6366f1"/> Estrategia recomendada</h4>
+                <h3><BrainCircuit size={18} color="#6366f1"/> Estrategia CFO Automática</h3>
               </div>
-              <div className="rec-content">
+              <div className="rec-content" style={{ padding: 0 }}>
                 {currentSimMargin < 40 ? (
                   <div className="rec-item rec-danger">
-                    <AlertTriangle size={18} />
-                    <p>Margen crítico. Considera aumentar el precio o buscar proveedores de materiales más económicos para este servicio.</p>
+                    <AlertTriangle size={24} className="text-red" />
+                    <p><strong>Riesgo de Rentabilidad detectado.</strong> El margen resultante está por debajo del umbral de seguridad clínica. Se recomienda encarecidamente revisar la cadena de suministro o el tiempo de sillón asignado.</p>
                   </div>
                 ) : marginDiff > 5 ? (
                   <div className="rec-item rec-success">
-                    <TrendingUp size={18} />
-                    <p>Optimización positiva. Este ajuste aumentaría la rentabilidad neta mensual en aprox. ${(marginDiff/100 * simPrice * (selectedForSim.times_performed || 10)).toFixed(0)}.</p>
+                    <TrendingUp size={24} className="text-green" />
+                    <p><strong>Optimización de Alto Impacto.</strong> Este ajuste proyecta una utilidad incremental de <strong>${(marginDiff/100 * simPrice * (selectedForSim.times_performed || 10)).toFixed(0)}</strong> mensuales. Es seguro proceder con el cambio en el catálogo.</p>
                   </div>
                 ) : (
                   <div className="rec-item rec-info">
-                    <Briefcase size={18} />
-                    <p>Mantén este rango de precios. El margen es saludable y competitivo para la categoría de {selectedForSim.category}.</p>
+                    <Briefcase size={24} className="text-accent" />
+                    <p><strong>Equilibrio de Mercado.</strong> Mantienes una posición competitiva. El margen es saludable para la categoría <strong>{selectedForSim.category}</strong> y permite absorber fluctuaciones menores en costos.</p>
                   </div>
                 )}
               </div>
