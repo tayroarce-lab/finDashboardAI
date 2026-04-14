@@ -1,0 +1,224 @@
+.subscription-page {
+  animation: fadeIn 0.4s ease-out;
+}
+
+.section-title {
+  margin: 3rem 0 1.5rem;
+  font-size: 1.5rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.subscription-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+/* Current Plan Card */
+.current-plan-card {
+  position: relative;
+  padding: 2rem;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(0, 0, 0, 0.4));
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.status-badge {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  padding: 4px 12px;
+  background: var(--color-green);
+  color: white;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+}
+
+.plan-stats {
+  display: flex;
+  gap: 2rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.plan-stats span {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.plan-stats p {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+/* Payment Card */
+.payment-method-card .card-body {
+  padding-top: 1rem;
+}
+
+.cc-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--glass-border);
+}
+
+.cc-icon {
+  width: 48px;
+  height: 32px;
+  background: #1e293b;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cc-number {
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+/* Plans Grid */
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.plan-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 2.5rem 2rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.plan-selected {
+  border-color: var(--accent-primary);
+  background: rgba(99, 102, 241, 0.03);
+  transform: scale(1.02);
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5), 0 0 20px rgba(99, 102, 241, 0.1);
+}
+
+.plan-popular {
+  border-color: var(--accent-primary);
+}
+
+.popular-tag {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--accent-primary);
+  color: white;
+  padding: 4px 16px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+}
+
+.plan-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.plan-price {
+  margin: 1.5rem 0;
+  display: flex;
+  align-items: baseline;
+}
+
+.plan-price .amount {
+  font-size: 3rem;
+  font-weight: 900;
+  letter-spacing: -0.05em;
+}
+
+.plan-price .currency {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-right: 0.25rem;
+}
+
+.plan-price .period {
+  color: var(--text-muted);
+  margin-left: 0.5rem;
+}
+
+.plan-desc {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 2rem;
+  height: 3rem;
+}
+
+.plan-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  flex: 1;
+}
+
+.plan-features li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+/* Billing History */
+.billing-history {
+  margin-top: 4rem;
+}
+
+.icon-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
+  color: var(--text-primary);
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.icon-btn:hover {
+  background: var(--accent-primary);
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .plan-card {
+    padding: 2rem 1.5rem;
+  }
+  .plan-price .amount {
+    font-size: 2.5rem;
+  }
+}

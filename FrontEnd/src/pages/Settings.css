@@ -1,0 +1,85 @@
+.settings-page {
+  animation: fadeIn 0.4s ease-out;
+}
+
+.settings-billing-cta {
+  padding: 1.5rem;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  border-radius: 12px;
+  color: white;
+  margin-top: 1rem;
+  box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.4);
+}
+
+.settings-billing-cta h3 {
+  margin: 0.25rem 0 1.25rem;
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.settings-billing-cta .btn-primary {
+  background: white;
+  color: var(--accent-primary);
+  border: none;
+}
+
+.settings-billing-cta .btn-primary:hover {
+  background: rgba(255, 255, 255, 0.9);
+  transform: translateY(-2px);
+}
+
+.team-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+.team-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  border: 1px solid var(--glass-border);
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  background: var(--accent-glow);
+  color: var(--accent-primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.875rem;
+}
+
+.team-item p {
+  font-weight: 600;
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.team-item small {
+  font-size: 0.75rem;
+}
+
+.form-control {
+  transition: all 0.2s;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--accent-primary) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+@media (max-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}

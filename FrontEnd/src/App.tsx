@@ -11,6 +11,7 @@ import Patients from './pages/Patients';
 import Inventory from './pages/Inventory';
 import AIPanel from './pages/AIPanel';
 import Settings from './pages/Settings';
+import Subscription from './pages/Subscription';
 import NotFound from './pages/NotFound';
 import { Toaster } from 'sonner';
 import './index.css';
@@ -43,6 +44,7 @@ function AppRoutes() {
           <Route path="/patients" element={<Patients />} />
           <Route path="/inventory" element={<Inventory />} />
           <Route path="/ai-panel" element={<AIPanel />} />
+          <Route path="/subscription" element={<Subscription />} />
           <Route path="/settings" element={<Settings />} />
           
           {/* 404 Route inside Layout (preserves navigation so user can click to go back easily) */}

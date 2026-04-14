@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import { Settings as SettingsIcon, Building, CreditCard, Bell, Shield, Save } from 'lucide-react';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
+import './Settings.css';
 
 export default function Settings() {
+  const navigate = useNavigate();
   const [clinicName, setClinicName] = useState('Clínica Dental Sonrisa');
   const [currency, setCurrency] = useState('USD');
   const [notifications, setNotifications] = useState(true);
@@ -85,18 +88,32 @@ export default function Settings() {
 
         <div className="card animate-fade-in stagger-2">
           <div className="card-header">
-            <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <CreditCard size={18} /> Plan y Facturación
-            </h3>
+            <h3><CreditCard size={18} /> Plan y Facturación</h3>
           </div>
-          <div style={{ padding: '1rem 0' }}>
-            <div style={{ background: 'linear-gradient(45deg, #6366f1, #a855f7)', padding: '1.5rem', borderRadius: '12px', color: 'white' }}>
-              <p style={{ margin: 0, fontSize: '0.8rem', opacity: 0.8 }}>Plan Actual</p>
-              <h2 style={{ margin: '0.25rem 0' }}>DentalFlow PRO</h2>
-              <button style={{ marginTop: '1rem', background: 'white', color: '#6366f1', border: 'none', padding: '0.5rem 1rem', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 'bold', cursor: 'pointer' }}>
-                Gestionar Suscripción
-              </button>
+          <div className="settings-billing-cta">
+            <p className="text-muted text-xs">Plan Actual</p>
+            <h3>DentalFlow PRO</h3>
+            <button className="btn btn-primary btn-sm" onClick={() => navigate('/subscription')}>
+              Gestionar Suscripción
+            </button>
+          </div>
+        </div>
+
+        <div className="card animate-fade-in stagger-4">
+          <div className="card-header">
+            <h3><Users size={18} /> Equipo y Usuarios</h3>
+          </div>
+          <div className="team-list">
+            <div className="team-item">
+              <div className="avatar">AD</div>
+              <div>
+                <p>Admin Principal</p>
+                <small className="text-muted">Propietario</small>
+              </div>
             </div>
+            <button className="btn btn-secondary btn-sm w-full" style={{ marginTop: '1rem' }}>
+              Invitar Miembro
+            </button>
           </div>
         </div>
 

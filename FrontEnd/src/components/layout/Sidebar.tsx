@@ -3,7 +3,7 @@ import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Stethoscope, Receipt, CalendarDays, Package,
   BrainCircuit, Settings, LogOut, Activity, Users,
-  ChevronLeft, ChevronRight, ShieldCheck
+  ChevronLeft, ChevronRight, ShieldCheck, CreditCard
 } from 'lucide-react';
 import './Sidebar.css';
 
@@ -16,6 +16,7 @@ const navItems = [
   { to: '/inventory', icon: Package, label: 'Inventario' },
   { to: '/doctors', icon: Users, label: 'Doctores' },
   { to: '/ai-panel', icon: BrainCircuit, label: 'CFO Digital' },
+  { to: '/subscription', icon: CreditCard, label: 'Suscripción' },
 ];
 
 interface SidebarProps {
