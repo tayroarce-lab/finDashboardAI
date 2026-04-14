@@ -9,10 +9,9 @@ import Appointments from './pages/Appointments';
 import Doctors from './pages/Doctors';
 import Patients from './pages/Patients';
 import Inventory from './pages/Inventory';
-
 import AIPanel from './pages/AIPanel';
-
 import Settings from './pages/Settings';
+import NotFound from './pages/NotFound';
 import { Toaster } from 'sonner';
 import './index.css';
 
@@ -32,6 +31,7 @@ function AppRoutes() {
         <Route path="/login" element={
           isAuthenticated ? <Navigate to="/" replace /> : <Login />
         } />
+        
         <Route element={
           <ProtectedRoute><MainLayout /></ProtectedRoute>
         }>
@@ -42,11 +42,15 @@ function AppRoutes() {
           <Route path="/doctors" element={<Doctors />} />
           <Route path="/patients" element={<Patients />} />
           <Route path="/inventory" element={<Inventory />} />
-
           <Route path="/ai-panel" element={<AIPanel />} />
-
           <Route path="/settings" element={<Settings />} />
+          
+          {/* 404 Route inside Layout (preserves navigation so user can click to go back easily) */}
+          <Route path="*" element={<NotFound />} />
         </Route>
+        
+        {/* Absolute 404 if hitting a bad url while completely logged out */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </>
   );

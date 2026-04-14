@@ -68,6 +68,20 @@
 }
 
 /* ─── Cards ────────────────────────────────── */
+.chart-card, .ai-insight-card, .card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-card);
+}
+
+.card:hover {
+  border-color: var(--accent-glow);
+  box-shadow: var(--shadow-elevated);
+  transform: translateY(-2px);
+}
+
 .card-header {
   display: flex;
   justify-content: space-between;

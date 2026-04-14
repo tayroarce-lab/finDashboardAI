@@ -16,14 +16,17 @@ CREATE TABLE IF NOT EXISTS appointments (
     revenue DECIMAL(10,2) NOT NULL,
     doctor_commission DECIMAL(10,2) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (treatment_id) REFERENCES treatments(id)
+    FOREIGN KEY (treatment_id) REFERENCES treatments(id),
+    INDEX (appointment_date)
 );
 
 CREATE TABLE IF NOT EXISTS fixed_expenses (
     id INT AUTO_INCREMENT PRIMARY KEY,
     description VARCHAR(255) NOT NULL,
     monthly_amount DECIMAL(10,2) NOT NULL,
-    category VARCHAR(50)
+    category VARCHAR(50),
+    billing_month DATE, -- Mantenimiento de histórico
+    INDEX (billing_month)
 );
 
 CREATE TABLE IF NOT EXISTS ai_insights (

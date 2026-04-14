@@ -4,7 +4,7 @@
 
 .inventory-stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1.5rem;
   margin-bottom: 2rem;
 }
@@ -13,24 +13,26 @@
   display: flex;
   align-items: center;
   gap: 1.25rem;
-  padding: 1.5rem;
-  background: var(--card-bg);
+  padding: 1.25rem 1.5rem;
+  background: var(--glass-bg);
   backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
 }
 
 .stat-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.stat-icon.purple { background: rgba(99, 102, 241, 0.1); color: #6366f1; }
-.stat-icon.red { background: rgba(244, 63, 94, 0.1); color: #f43f5e; }
-.stat-icon.green { background: rgba(16, 185, 129, 0.1); color: #10b981; }
-.stat-icon.blue { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+.stat-icon.purple { background: var(--accent-glow); color: var(--accent-primary); }
+.stat-icon.red { background: var(--color-red-bg); color: var(--color-red); }
+.stat-icon.green { background: var(--color-green-bg); color: var(--color-green); }
+.stat-icon.blue { background: var(--color-blue-bg); color: var(--color-blue); }
 
 .stat-label {
   display: block;
@@ -152,6 +154,13 @@
 .btn-icon:hover {
   background: rgba(255, 255, 255, 0.05);
   border-color: var(--text-muted);
+}
+
+.grid-list-loading {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem 0;
 }
 
 @media (max-width: 768px) {

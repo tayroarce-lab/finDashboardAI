@@ -4,13 +4,15 @@
   position: fixed;
   left: 0;
   top: 0;
-  background: var(--bg-secondary);
-  border-right: 1px solid var(--border-color);
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-right: 1px solid var(--glass-border);
   display: flex;
   flex-direction: column;
   padding: 1.5rem 1rem;
   z-index: 100;
-  animation: slideInLeft 0.4s ease;
+  animation: slideInLeft 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .sidebar-brand {

@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Package, Plus, Search, AlertCircle, ShoppingCart, History, TrendingDown, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { Package, Plus, Search, AlertCircle, ShoppingCart, History, TrendingDown, ArrowUpRight, ArrowDownRight, ArchiveX } from 'lucide-react';
 import api from '../services/api';
 import { toast } from 'sonner';
+import EmptyState from '../components/ui/EmptyState';
+import Skeleton from '../components/ui/Skeleton';
 import './Inventory.css';
 
 interface InventoryItem {
@@ -59,19 +61,19 @@ export default function Inventory() {
   };
 
   return (
-    <div className="inventory-page">
+    <div className="inventory-page animate-fade-in">
       <header className="page-header">
         <div>
-          <h1 className="flex items-center gap-2">
+          <h1 style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <Package size={32} color="#6366f1" /> Gestión de Inventario
           </h1>
           <p className="text-muted">Control de insumos, materiales y equipos dentales</p>
         </div>
         <div className="page-actions">
-          <button className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <History size={16} /> Ver Movimientos
+          <button className="btn btn-secondary">
+            <History size={16} /> Movimientos
           </button>
-          <button className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <button className="btn btn-primary">
             <Plus size={16} /> Nuevo Ítem
           </button>
         </div>
@@ -79,37 +81,23 @@ export default function Inventory() {
 
       {/* Stats row */}
       <div className="inventory-stats">
-        <div className="card stat-card">
-          <div className="stat-icon purple"><Package size={20} /></div>
-          <div className="stat-content">
-            <span className="stat-label">Total Ítems</span>
-            <span className="stat-value">{stats.totalItems}</span>
+        {[
+          { icon: Package, label: 'Total Ítems', value: stats.totalItems, color: 'purple' },
+          { icon: AlertCircle, label: 'Stock Bajo', value: stats.lowStock, color: 'red' },
+          { icon: ShoppingCart, label: 'Valorizado', value: `$${stats.totalValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}`, color: 'green' },
+          { icon: TrendingDown, label: 'Categorías', value: stats.categories, color: 'blue' }
+        ].map((s, i) => (
+          <div key={i} className={`card stat-card stagger-${i+1}`}>
+            <div className={`stat-icon ${s.color}`}><s.icon size={20} /></div>
+            <div className="stat-content">
+              <span className="stat-label">{s.label}</span>
+              <span className="stat-value">{s.value}</span>
+            </div>
           </div>
-        </div>
-        <div className="card stat-card">
-          <div className="stat-icon red"><AlertCircle size={20} /></div>
-          <div className="stat-content">
-            <span className="stat-label">Stock Bajo</span>
-            <span className="stat-value">{stats.lowStock}</span>
-          </div>
-        </div>
-        <div className="card stat-card">
-          <div className="stat-icon green"><ShoppingCart size={20} /></div>
-          <div className="stat-content">
-            <span className="stat-label">Valorizado</span>
-            <span className="stat-value">${stats.totalValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-          </div>
-        </div>
-        <div className="card stat-card">
-          <div className="stat-icon blue"><TrendingDown size={20} /></div>
-          <div className="stat-content">
-            <span className="stat-label">Categorías</span>
-            <span className="stat-value">{stats.categories}</span>
-          </div>
-        </div>
+        ))}
       </div>
 
-      <div className="card inventory-main">
+      <div className="card inventory-main animate-fade-in stagger-3">
         <div className="inventory-controls">
           <div className="search-wrap">
             <Search size={18} className="search-icon" />
@@ -122,7 +110,7 @@ export default function Inventory() {
             />
           </div>
           <select 
-            className="input filter-select"
+            className="input filter-select select"
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
           >
@@ -136,18 +124,21 @@ export default function Inventory() {
         </div>
 
         {loading ? (
-          <div className="loading-state">
-            <div className="spinner"></div>
-            <p>Sincronizando almacén...</p>
+          <div className="grid-list-loading">
+            {Array(5).fill(0).map((_, i) => (
+              <Skeleton key={i} height="72px" />
+            ))}
           </div>
         ) : filteredItems.length === 0 ? (
-          <div className="empty-state">
-            <Package size={48} className="empty-icon" />
-            <h3>No se encontraron ítems</h3>
-            <p>Ajusta el filtro o agrega un nuevo producto al catálogo.</p>
-          </div>
+          <EmptyState 
+            icon={ArchiveX}
+            title="Inventario vacío"
+            description="No encontramos productos que coincidan con tu búsqueda o filtros."
+            actionLabel="Limpiar filtros"
+            onAction={() => { setSearchTerm(''); setFilter('all'); }}
+          />
         ) : (
-          <div className="table-responsive">
+          <div className="table-wrap">
             <table className="inventory-table">
               <thead>
                 <tr>

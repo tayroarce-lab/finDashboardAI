@@ -1,7 +1,7 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
-export const exportDashboardPDF = (kpis: any[], revenueData: any[], topTreatments: any[]) => {
+export const exportDashboardPDF = (kpis: any[], topTreatments: any[]) => {
   const doc = new jsPDF();
   const dateStr = new Date().toLocaleDateString();
 

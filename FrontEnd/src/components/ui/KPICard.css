@@ -1,16 +1,19 @@
 .kpi-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
+  background: var(--glass-bg);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   padding: 1.25rem 1.5rem;
   transition: all var(--transition-normal);
   opacity: 0;
+  animation: fadeIn 0.4s ease forwards;
 }
 
 .kpi-card:hover {
-  border-color: var(--border-hover);
+  border-color: var(--accent-glow);
   box-shadow: var(--shadow-card);
-  transform: translateY(-2px);
+  transform: translateY(-4px);
 }
 
 .kpi-header {

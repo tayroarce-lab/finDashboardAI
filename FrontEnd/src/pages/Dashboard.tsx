@@ -82,7 +82,7 @@ export default function Dashboard() {
           </div>
           <button 
             className="btn btn-secondary" 
-            onClick={() => exportDashboardPDF(kpis, revenueChart, topTreatments)}
+            onClick={() => exportDashboardPDF(kpis, topTreatments)}
             style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
           >
             <Download size={16} /> Exportar PDF

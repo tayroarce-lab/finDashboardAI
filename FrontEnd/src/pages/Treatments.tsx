@@ -8,6 +8,7 @@ import type { TreatmentProfitability } from '../types';
 import Skeleton from '../components/ui/Skeleton';
 import { downloadCSV } from '../utils/export';
 import { toast } from 'sonner';
+import api from '../services/api';
 import './Treatments.css';
 
 // Mock profitability data
@@ -34,22 +35,21 @@ export default function Treatments() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('df_token');
-    if (!token) return;
-
-    fetch('http://localhost:3000/api/treatments/analysis/profitability', {
-      headers: { 'Authorization': `Bearer ${token}` }
-    })
-      .then(res => res.json())
-      .then(json => {
-        if (json.success && json.data) {
-          // Si el backend devuelve camelCase o la DB trae variaciones, lo intentamos empatar:
-          // Como n8n y DashboardService leían snake_case o camel, asumimos que respeta TreatmentProfitability.
-          setProfitabilityData(json.data);
+    const fetchTreatments = async () => {
+      try {
+        setLoading(true);
+        const res = await api.get('/treatments/analysis/profitability');
+        if (res.data.success && res.data.data) {
+          setProfitabilityData(res.data.data);
         }
-      })
-      .catch(err => console.error("Error fetching treatments data:", err))
-      .finally(() => setLoading(false));
+      } catch (err) {
+        console.error("Error fetching treatments data:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchTreatments();
   }, []);
 
   const activeData = profitabilityData.filter(t => t.times_performed > 0);
